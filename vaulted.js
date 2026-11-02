@@ -77,8 +77,8 @@ export function createVaultedCeiling({scene,INCH,box,rod,cylinder,m,paint,trim,g
   const highGlass=new THREE.MeshBasicMaterial({color:'#fffbed',transparent:true,opacity:.97,depthWrite:false,toneMapped:false});
   const pane=box(25.8,25.8,.12,wx,wy,-1,highGlass,highWindow);pane.name='gable-window-glass';pane.castShadow=false;
   reflections.addPane(highWindow,25.8,25.8,wx,wy,-.85);
-  // Crop only the upper-central sky from the supplied night photograph.
-  const skyTexture=new THREE.TextureLoader().load('./Images/Night-Skyline.jpg',texture=>{
+  // Upper-central sky from the matching nighttime sweep, without city/trees.
+  const skyTexture=new THREE.TextureLoader().load('./Images/Exterior/Night/view-04.jpg',texture=>{
     const skyWidth=.34,skyHeight=skyWidth*texture.image.width/texture.image.height;
     texture.repeat.set(skyWidth,skyHeight);texture.offset.set(.32,.99-skyHeight);
   });skyTexture.colorSpace=THREE.SRGBColorSpace;skyTexture.anisotropy=8;

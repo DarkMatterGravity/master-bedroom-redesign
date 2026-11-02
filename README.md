@@ -4,7 +4,8 @@
 The hosted viewer runs directly in a browser; no installation is needed.
 Daytime windows show the actual neighborhood and water view, projected onto
 a curved exterior band from two photos and nine calibrated video frames.
-The existing city view and front-window shutters remain in night mode.
+Night mode uses a matching curved panorama from nine frames of the actual
+nighttime sweep, with the front-window plantation shutters closed.
 
 To run locally, double-click **Start-Room.cmd** on Windows, or run `python serve.py` in this folder.
 The server opens http://127.0.0.1:8000 in your browser. Keep its terminal window open.

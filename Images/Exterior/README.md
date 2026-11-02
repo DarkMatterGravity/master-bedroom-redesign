@@ -17,5 +17,5 @@ front sill/jamb is omitted using UV bounds. These are photographic backdrops,
 not a reconstruction of the outdoor buildings: movement has approximate
 parallax, and nearby objects can show minor capture alignment differences.
 
-The band is visible by day. Night continues to use the original city photo
-and closed front-window shutters until a matching nighttime sweep is supplied.
+The band is visible by day. Night switches to the matching calibrated video
+patches in `Night/`; the front-window plantation shutters remain closed.

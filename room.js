@@ -1,11 +1,11 @@
 import * as THREE from './vendor/three.module.js';
 import { createInspiredDesign } from './designs.js?v=20261102-darker-curtains';
-import { createVaultedCeiling } from './vaulted.js?v=20261102-finishes';
+import { createVaultedCeiling } from './vaulted.js?v=20261102-night-panorama';
 import { createWindowReflections } from './glass.js?v=20261102-finishes';
 import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js';
 import { createAntiqueFurniture } from './antique-furniture.js';
 import { miteredRail, miteredFrameBand } from './joinery.js';
-import { createPhotoExterior } from './exterior.js';
+import { createPhotoExterior } from './exterior.js?v=20261102-night-panorama';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.
 const INCH = 0.0254;
@@ -146,16 +146,6 @@ windowModel(doubleNorth,42,true);windowModel(doubleNorth,79,true);
 box(73,1.6,4,60.5,27.4,1.5,trim,doubleNorth);
 box(76,1,5,60.5,26.4,1.7,trim,doubleNorth);
 box(3,56,2,60.5,56,.1,trim,doubleNorth);
-// One continuous photographic backdrop sits beyond both panes. It is visible
-// only at night; daytime looks through clear glass to the curved photo band.
-const skylineTexture=new THREE.TextureLoader().load('./Images/Night-Skyline.jpg',texture=>{
-  const crop=(73/58)/(texture.image.width/texture.image.height);
-  texture.repeat.set(crop,1);texture.offset.set((1-crop)/2,0);
-});
-skylineTexture.colorSpace=THREE.SRGBColorSpace;skylineTexture.anisotropy=8;
-const skyline=new THREE.Mesh(new THREE.PlaneGeometry(73*INCH,58*INCH),new THREE.MeshBasicMaterial({map:skylineTexture,toneMapped:false}));
-skyline.name='night-skyline-view';skyline.position.set(60.5*INCH,56*INCH,-2.2*INCH);skyline.visible=false;doubleNorth.add(skyline);
-const pairedGlass=doubleNorth.children.filter(mesh=>mesh.name==='window-glazing').map(mesh=>mesh.material);
 // White hydronic baseboard heating under the windows.
 function heater(w,x,z,rot){const g=new THREE.Group();g.position.set(x*INCH,0,z*INCH);g.rotation.y=rot;scene.add(g);box(w,6,2.5,0,3.7,0,trim,g);box(w,1,3,0,7,.1,trim,g);box(w-2,.5,.15,0,5.1,1.35,m('#858a7e'),g);}
 heater(112,60,2.3,0);heater(94,2.3,53,Math.PI/2);
@@ -248,7 +238,7 @@ const fanLight=new THREE.PointLight('#ffdfad',15,7,2);fanLight.position.set(72*I
 // A six-face skybox with a gentle sky gradient and procedural clouds.
 function skyFace(face){const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;const c=canvas.getContext('2d');const grad=c.createLinearGradient(0,0,0,512);if(face===2){grad.addColorStop(0,'#81b0d1');grad.addColorStop(1,'#97bed5');}else if(face===3){grad.addColorStop(0,'#92a17d');grad.addColorStop(1,'#869577');}else{grad.addColorStop(0,'#91b8d2');grad.addColorStop(.53,'#d4e0df');grad.addColorStop(.55,'#aebba1');grad.addColorStop(1,'#8b9b76');}c.fillStyle=grad;c.fillRect(0,0,512,512);if(face!==3){for(let i=0;i<20;i++){const x=random()*512,y=random()*(face===2?512:230),r=15+random()*45;const cloud=c.createRadialGradient(x,y,0,x,y,r);cloud.addColorStop(0,'#ffffff50');cloud.addColorStop(1,'#ffffff00');c.fillStyle=cloud;c.fillRect(x-r,y-r,r*2,r*2);}}return canvas;}
 const skybox=new THREE.CubeTexture(Array.from({length:6},(_,i)=>skyFace(i)));skybox.colorSpace=THREE.SRGBColorSpace;skybox.needsUpdate=true;scene.background=skybox;
-const exterior=await createPhotoExterior(scene);
+const [exterior,nightExterior]=await Promise.all([createPhotoExterior(scene),createPhotoExterior(scene,{night:true})]);
 const hemi=new THREE.HemisphereLight('#d3e7f5','#99856e',1.3);scene.add(hemi);
 const sun=new THREE.DirectionalLight('#fff1d2',2.1);sun.position.set(-6,9,-7);sun.target.position.set(1,0,2);scene.add(sun,sun.target);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-5,right:5,top:5,bottom:-5,near:.1,far:24});sun.shadow.bias=-.0004;sun.shadow.normalBias=.02;sun.shadow.radius=3;
 // Broad, shadowless fill approximates bounced daylight from both windows.
@@ -287,12 +277,11 @@ function lighting(evening){
   night=evening;
   scene.background=evening?new THREE.Color('#000000'):skybox;
   exterior.visible=!evening;
+  nightExterior.visible=evening;
   hemi.intensity=evening?.2:1.3;
   sun.intensity=evening?0:3;
   windowLights.forEach((l,i)=>l.intensity=evening||(i===2&&activeDesign===1)?0:14);
-  windowGlazing.forEach(mat=>{mat.opacity=evening?1:.035;mat.color.set(evening?'#000000':'#e2eef3');});
-  skyline.visible=evening;
-  if(evening)pairedGlass.forEach(mat=>{mat.opacity=.045;mat.color.set('#b2c3d0');});
+  windowGlazing.forEach(mat=>{mat.opacity=evening?.045:.035;mat.color.set(evening?'#b2c3d0':'#e2eef3');});
   windowGlows.forEach(mat=>mat.opacity=evening?0:.025);
   closedWestShutters.visible=evening;
   shutters.forEach(group=>group.visible=activeDesign===1&&!(evening&&group.userData.westWindow));

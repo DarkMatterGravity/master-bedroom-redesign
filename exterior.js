@@ -2,17 +2,18 @@ import * as THREE from './vendor/three.module.js';
 
 // Calibrated photo patches share a distant cylinder rather than following the
 // camera or being pasted onto individual panes. Walls naturally mask the band.
-export async function createPhotoExterior(scene){
-  const response=await fetch('./Images/Exterior/cameras.json');
+export async function createPhotoExterior(scene,{night=false}={}){
+  const base=night?'./Images/Exterior/Night':'./Images/Exterior';
+  const response=await fetch(`${base}/cameras.json`);
   if(!response.ok)throw new Error('Could not load exterior camera calibration');
   const cameras=await response.json(),loader=new THREE.TextureLoader();
-  const group=new THREE.Group();group.name='exterior';scene.add(group);
+  const group=new THREE.Group();group.name=night?'night-exterior':'exterior';group.visible=!night;scene.add(group);
   const radius=24,origin=new THREE.Vector3(62*.0254,60*.0254,75*.0254);
-  const water=cameras.find(c=>c.image==='water.jpg'),front=cameras.find(c=>c.image==='front.jpg');
+  const water=night?cameras[5]:cameras.find(c=>c.image==='water.jpg'),front=night?cameras[0]:cameras.find(c=>c.image==='front.jpg');
   const heading=c=>Math.atan2(c.rotation[0][2],c.rotation[2][2]);
   const north=heading(water),yawScale=(Math.PI/2)/(north-heading(front));
   await Promise.all(cameras.map(async(camera,index)=>{
-    const texture=await loader.loadAsync(`./Images/Exterior/${camera.image}`);
+    const texture=await loader.loadAsync(`${base}/${camera.image}`);
     texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=8;
     const geometry=new THREE.PlaneGeometry(1,1,48,64);
     const position=geometry.attributes.position,uv=geometry.attributes.uv;
@@ -26,7 +27,8 @@ export async function createPhotoExterior(scene){
       const x=(u*camera.width-camera.ppx)/camera.focal,y=(v*camera.height-camera.ppy)/camera.focal;
       const rx=r[0][0]*x+r[0][1]*y+r[0][2],ry=r[1][0]*x+r[1][1]*y+r[1][2],rz=r[2][0]*x+r[2][1]*y+r[2][2];
       const horizontal=Math.hypot(rx,rz),angle=(Math.atan2(rx,rz)-north)*yawScale;
-      position.setXYZ(i,origin.x+Math.sin(angle)*radius,origin.y-ry/horizontal*radius,origin.z-Math.cos(angle)*radius);
+      // The night camera points slightly down; level the distant water horizon.
+      position.setXYZ(i,origin.x+Math.sin(angle)*radius,origin.y-(ry/horizontal+(night?.075:0))*radius,origin.z-Math.cos(angle)*radius);
       uv.setXY(i,u,1-v);
     }
     geometry.computeVertexNormals();geometry.computeBoundingSphere();
@@ -44,6 +46,6 @@ export async function createPhotoExterior(scene){
     const patch=new THREE.Mesh(geometry,material);patch.name=`exterior-photo-${camera.image}`;
     patch.renderOrder=-20+index;group.add(patch);
   }));
-  group.userData={type:'calibrated-cylindrical-photo-band',radiusMeters:radius,videoFrames:9,photographs:2,frontDirection:'west',waterDirection:'north'};
+  group.userData={type:'calibrated-cylindrical-photo-band',radiusMeters:radius,videoFrames:9,photographs:night?0:2,frontDirection:'west',waterDirection:'north',night};
   return group;
 }
