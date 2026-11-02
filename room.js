@@ -5,6 +5,7 @@ import { createWindowReflections } from './glass.js?v=20261102-finishes';
 import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js';
 import { createAntiqueFurniture } from './antique-furniture.js';
 import { miteredRail, miteredFrameBand } from './joinery.js';
+import { createPhotoExterior } from './exterior.js';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.
 const INCH = 0.0254;
@@ -146,7 +147,7 @@ box(73,1.6,4,60.5,27.4,1.5,trim,doubleNorth);
 box(76,1,5,60.5,26.4,1.7,trim,doubleNorth);
 box(3,56,2,60.5,56,.1,trim,doubleNorth);
 // One continuous photographic backdrop sits beyond both panes. It is visible
-// only at night; daytime keeps the original overexposed white glazing and glow.
+// only at night; daytime looks through clear glass to the curved photo band.
 const skylineTexture=new THREE.TextureLoader().load('./Images/Night-Skyline.jpg',texture=>{
   const crop=(73/58)/(texture.image.width/texture.image.height);
   texture.repeat.set(crop,1);texture.offset.set((1-crop)/2,0);
@@ -247,16 +248,7 @@ const fanLight=new THREE.PointLight('#ffdfad',15,7,2);fanLight.position.set(72*I
 // A six-face skybox with a gentle sky gradient and procedural clouds.
 function skyFace(face){const canvas=document.createElement('canvas');canvas.width=512;canvas.height=512;const c=canvas.getContext('2d');const grad=c.createLinearGradient(0,0,0,512);if(face===2){grad.addColorStop(0,'#81b0d1');grad.addColorStop(1,'#97bed5');}else if(face===3){grad.addColorStop(0,'#92a17d');grad.addColorStop(1,'#869577');}else{grad.addColorStop(0,'#91b8d2');grad.addColorStop(.53,'#d4e0df');grad.addColorStop(.55,'#aebba1');grad.addColorStop(1,'#8b9b76');}c.fillStyle=grad;c.fillRect(0,0,512,512);if(face!==3){for(let i=0;i<20;i++){const x=random()*512,y=random()*(face===2?512:230),r=15+random()*45;const cloud=c.createRadialGradient(x,y,0,x,y,r);cloud.addColorStop(0,'#ffffff50');cloud.addColorStop(1,'#ffffff00');c.fillStyle=cloud;c.fillRect(x-r,y-r,r*2,r*2);}}return canvas;}
 const skybox=new THREE.CubeTexture(Array.from({length:6},(_,i)=>skyFace(i)));skybox.colorSpace=THREE.SRGBColorSpace;skybox.needsUpdate=true;scene.background=skybox;
-const exteriorStart=scene.children.length;
-const ground=m('#7c9065');box(4000,2,4000,0,-115,0,ground);
-// Simplified neighboring houses and leafy trees below the second-floor windows.
-function house(x,z,rot,color){const g=new THREE.Group();g.position.set(x*INCH,-110*INCH,z*INCH);g.rotation.y=rot;scene.add(g);const siding=m(color);box(185,135,155,0,67.5,0,siding,g);const roof=new THREE.Mesh(new THREE.CylinderGeometry(135*INCH,135*INCH,195*INCH,3),m('#656c67'));roof.rotation.z=Math.PI/2;roof.rotation.y=Math.PI/2;roof.position.y=155*INCH;g.add(roof);for(const xx of [-55,0,55])for(const y of [45,102]){box(25,35,1,xx,y,78,trim,g);box(20,29,1,xx,y,79,m('#6e95a1'),g);box(1,29,1,xx,y,80,trim,g);}for(let y=8;y<133;y+=7)box(185,.6,1,0,y,78,m('#ffffff',1,{transparent:true,opacity:.12}),g);}
-house(30,-490,.05,'#b8c5bd');house(-450,50,Math.PI/2,'#b7c4c4');house(-280,-520,-.15,'#d4cdb8');
-for(let i=0;i<16;i++){const a=random()*Math.PI*2,dist=420+random()*550;const x=Math.cos(a)*dist+60,z=Math.sin(a)*dist+60;if(x>0&&z>0)continue;const h=160+random()*120;cylinder(5,8,h,x,h/2-110,z,m('#6e6250'));const leaf=m(['#72865d','#698460','#839362'][i%3]);for(let j=0;j<5;j++)sphere(50+random()*30,65+random()*30,50+random()*30,x+(random()-.5)*60,h-95+random()*65,z+(random()-.5)*60,leaf);}
-
-// Keep all outdoor meshes together so night mode removes them completely.
-const exterior=new THREE.Group();exterior.name='exterior';
-exterior.add(...scene.children.slice(exteriorStart));scene.add(exterior);
+const exterior=await createPhotoExterior(scene);
 const hemi=new THREE.HemisphereLight('#d3e7f5','#99856e',1.3);scene.add(hemi);
 const sun=new THREE.DirectionalLight('#fff1d2',2.1);sun.position.set(-6,9,-7);sun.target.position.set(1,0,2);scene.add(sun,sun.target);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-5,right:5,top:5,bottom:-5,near:.1,far:24});sun.shadow.bias=-.0004;sun.shadow.normalBias=.02;sun.shadow.radius=3;
 // Broad, shadowless fill approximates bounced daylight from both windows.
@@ -298,10 +290,10 @@ function lighting(evening){
   hemi.intensity=evening?.2:1.3;
   sun.intensity=evening?0:3;
   windowLights.forEach((l,i)=>l.intensity=evening||(i===2&&activeDesign===1)?0:14);
-  windowGlazing.forEach(mat=>{mat.opacity=evening?1:.97;mat.color.set(evening?'#000000':'#fffbed');});
+  windowGlazing.forEach(mat=>{mat.opacity=evening?1:.035;mat.color.set(evening?'#000000':'#e2eef3');});
   skyline.visible=evening;
   if(evening)pairedGlass.forEach(mat=>{mat.opacity=.045;mat.color.set('#b2c3d0');});
-  windowGlows.forEach(mat=>mat.opacity=evening?0:.24);
+  windowGlows.forEach(mat=>mat.opacity=evening?0:.025);
   closedWestShutters.visible=evening;
   shutters.forEach(group=>group.visible=activeDesign===1&&!(evening&&group.userData.westWindow));
   fanLight.intensity=activeDesign===1?(evening?14:5):0;

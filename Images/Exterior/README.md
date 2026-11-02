@@ -1,0 +1,21 @@
+# Actual daytime exterior
+
+`front.jpg` is the original IMG_7582 photograph; `water.jpg` is IMG_7580.
+`view-00.jpg` through `view-08.jpg` are unretouched frames at one-second
+intervals from IMG_7579.MOV (0 through 8 seconds, including its final frame).
+The original movie and unused source photos remain local.
+
+`cameras.json` records focal length, principal point and relative camera
+rotation estimated from SIFT feature matches and refined with OpenCV's
+rotation bundle adjustment. Intrinsics are in each source image's pixels.
+
+`exterior.js` projects these overlapping photographs onto a 24-meter-radius
+cylinder outside the room. The water photograph faces the paired north
+windows; the front photograph faces west. Feathered edges blend the patches,
+and the higher resolution stills overlay the video coverage. The photographed
+front sill/jamb is omitted using UV bounds. These are photographic backdrops,
+not a reconstruction of the outdoor buildings: movement has approximate
+parallax, and nearby objects can show minor capture alignment differences.
+
+The band is visible by day. Night continues to use the original city photo
+and closed front-window shutters until a matching nighttime sweep is supplied.
