@@ -1,0 +1,15 @@
+# Local tools, generated browser checks, and caches
+.claude/
+.codex/
+previews/
+__pycache__/
+*.py[cod]
+node_modules/
+.env
+.env.*
+*.log
+
+# Unused original photos stay on this computer; the room uses baked textures.
+Images/Inspiration/
+Images/IMG_*.jpg
+Images/References/Actual-*.jpg

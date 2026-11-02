@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Master bedroom · Room study</title>
+  <link rel="stylesheet" href="style.css?v=20261102-finishes">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234b7060'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-size='36' fill='%23f6f5eb' font-family='Georgia'%3EM%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+  <main id="viewport" aria-label="Interactive 3D bedroom. Drag to look around; use W A S D or arrow keys to move." tabindex="0"></main>
+  <div id="design-picker" role="group" aria-label="Room design variants"><button type="button" aria-label="Design 1: existing room" data-design="1" aria-pressed="true" title="Design 1: existing room">1</button><button type="button" aria-label="Design 2: warm beige, linen and walnut" data-design="2" aria-pressed="false" title="Design 2: warm beige, linen and walnut">2</button><button type="button" aria-label="Design 3: vaulted white shiplap ceiling" data-design="3" aria-pressed="false" title="Design 3: vaulted white shiplap ceiling">3</button><button type="button" aria-label="Design 4: vault with flat collar-tie ceiling" data-design="4" aria-pressed="false" title="Design 4: flat ceiling beneath the ridge">4</button></div>
+  <button id="day-night" type="button" aria-label="Switch to night" aria-pressed="false">☀ Day</button>
+  <button id="plan-toggle" type="button" aria-controls="floor-plan" aria-expanded="false" aria-pressed="false">▱ Floor plan</button>
+  <div id="floor-plan" hidden><canvas id="plan-canvas" width="338" height="374" role="img" aria-label="Bedroom floor plan with your current position and viewing direction"></canvas></div>
+  <div id="loading"><span class="spinner"></span><p>Building your room…</p></div>
+  <script type="module" src="room.js?v=20261102-finishes"></script>
+</body>
+</html>

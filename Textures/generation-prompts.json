@@ -1,0 +1,13 @@
+{
+  "tool": "built-in image_gen",
+  "prompts": [
+    {
+      "key": "floor_texture",
+      "prompt": "Use case: precise-object-edit. Asset type: seamless PBR base-color albedo texture, square 2048x2048 if possible, for an architectural Three.js floor. Image 1 is the user's actual narrow oak hardwood floor reference. Reconstruct a photorealistic perfectly top-down, orthographic, evenly lit square swatch of THIS flooring. Preserve its tan/light gray-brown/honey oak tones, fine strong grain, occasional dark knots, narrow equal-width planks and staggered butt joints. Eight equal-width planks run perfectly vertically; this represents a 26 by 26 inch physical tile, each plank approximately 3.25 inches wide. Natural board variation, not a repetitive striped pattern. Make all four edges tile seamlessly including grain and plank joints. Remove the shoe at the bottom, camera perspective, cyan daylight glare, shadows, illumination gradients, and strong specular highlights. This is raw diffuse/albedo only, not a rendered floor scene, no lighting baked in, no borders, no labels, no text. Material realism and fidelity to the reference matter most."
+    },
+    {
+      "key": "furniture_texture",
+      "prompt": "Use case: precise-object-edit. Asset type: seamless square PBR base-color/albedo wood texture, 2048x2048 if possible. Image 1 is the close-up material reference; Image 2 shows the full antique chest for color and finish context only. Reconstruct a flat orthographic seamless material swatch of the actual chest's aged dark reddish-brown mahogany/walnut finish. Horizontal flowing wood grain; deep brown and warm copper/reddish amber grain streaks, uneven aged varnish, restrained small worn areas, fine scratches and small nicks matching the real piece. Preserve the dark rich real wood appearance; do not make fresh orange wood. Remove the keyhole, framing, molding, furniture outline, cracks between panels, background, bedding and floor. No object depiction: the ENTIRE image must be uninterrupted wood material that can be applied to modeled furniture. Neutral uniform diffuse illumination; remove bright specular glare and lighting gradients while retaining actual grain and patina. No fabricated beveled panels or hardware, no baked shadows, no border, no text. All four edges tile seamlessly."
+    }
+  ]
+}
