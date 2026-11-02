@@ -75,7 +75,7 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
   const addCollider=(x,z,w,d)=>solids.push({x:x*INCH,z:z*INCH,w:w*INCH/2,d:d*INCH/2});
   const linenMaps=surface('linen','#ede8dc',7),walnutMaps=surface('wood','#725039',1),plasterMaps=surface('plaster','#ffffff',6),rugMaps=surface('rug','#b8b1a1',14);
   const linen=m('#ffffff',.95,linenMaps),white=m('#fffaf0',.95,surface('linen','#f3efe5',8));
-  const curtainLinen=m('#ffffff',.95,surface('linen','#b8b1a1',7));
+  const curtainLinen=m('#ffffff',.95,surface('linen','#9c8c75',7));
   const slate=m('#ffffff',.95,surface('linen','#737e87',8));
   const walnut=m('#ffffff',.65,walnutMaps),brass=m('#a5884b',.32,{metalness:.8}),iron=m('#292d2b',.45,{metalness:.6});
   const fixtureBlack=m('#111412',.58,{metalness:.25}),frameBlack=m('#171916',.45,{metalness:.15});
