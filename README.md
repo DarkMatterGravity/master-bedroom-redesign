@@ -16,7 +16,7 @@ since browser security restricts JavaScript modules opened as `file://` URLs.
 
 The browser displays the room with small day/night and floor-plan toggles in the upper-right corner.
 
-- Select **1**, **2**, **3**, or **4** in the upper-left to compare designs from the same camera position.
+- Select **Before** or **After** in the upper-left to compare the original room and latest redesign from the same camera position.
 - Drag anywhere in the room to look around, including up at the ceiling.
 - WASD / arrow keys move around the room.
 - Scroll to change the field of view.

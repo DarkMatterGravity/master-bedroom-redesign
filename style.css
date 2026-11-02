@@ -4,6 +4,6 @@
 
 #plan-toggle{right:100px}#floor-plan{position:fixed;top:62px;right:16px;width:184px;padding:10px;background:#faf9f0ed;border:1px solid #ffffff70;border-radius:14px;box-shadow:0 4px 20px #152b2720;backdrop-filter:blur(10px)}#floor-plan[hidden]{display:none}#plan-canvas{display:block;width:100%;height:auto}
 
-#design-picker{position:fixed;top:16px;left:16px;display:flex;gap:4px;padding:4px;background:#faf9f0e6;border:1px solid #ffffff70;border-radius:22px;box-shadow:0 2px 12px #152b2720;backdrop-filter:blur(10px)}#design-picker button{width:29px;height:27px;padding:0;border:0;border-radius:50%;background:transparent;color:#617165;font:12px Segoe UI,Arial,sans-serif;cursor:pointer}#design-picker button[aria-pressed=true]{background:#3b574b;color:#fff8ea}#design-picker button:focus-visible{outline:2px solid #86b49e;outline-offset:2px}
+#design-picker{position:fixed;top:16px;left:16px;display:flex;gap:4px;padding:4px;background:#faf9f0e6;border:1px solid #ffffff70;border-radius:22px;box-shadow:0 2px 12px #152b2720;backdrop-filter:blur(10px)}#design-picker button{min-width:29px;height:27px;padding:0 12px;border:0;border-radius:18px;background:transparent;color:#617165;font:12px Segoe UI,Arial,sans-serif;cursor:pointer}#design-picker button[aria-pressed=true]{background:#3b574b;color:#fff8ea}#design-picker button:focus-visible{outline:2px solid #86b49e;outline-offset:2px}
 
 @media(max-width:380px){#design-picker{left:10px;gap:2px;padding:3px}#design-picker button{width:23px;height:26px}}
