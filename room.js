@@ -1,11 +1,12 @@
 import * as THREE from './vendor/three.module.js';
-import { createInspiredDesign } from './designs.js?v=20261102-darker-curtains';
-import { createVaultedCeiling } from './vaulted.js?v=20261102-upper-canopy';
-import { createWindowReflections } from './glass.js?v=20261102-finishes';
-import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js';
+import { createInspiredDesign } from './designs.js?v=20261103-quality';
+import { createVaultedCeiling } from './vaulted.js?v=20261103-quality';
+import { createWindowReflections } from './glass.js?v=20261103-quality';
+import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js?v=20261103-quality';
 import { createAntiqueFurniture } from './antique-furniture.js';
 import { miteredRail, miteredFrameBand } from './joinery.js';
 import { createPhotoExterior } from './exterior.js?v=20261102-night-panorama';
+import { installRefinedSoftgoods, installBakedLighting } from './quality.js?v=20261103-quality';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.
 const INCH = 0.0254;
@@ -255,7 +256,9 @@ dimension([3,89,9],[166,89,9],'169″ · 14′ 1″');dimension([9,89,3],[9,89,1
 const originalColliders=colliders.slice();
 const antiqueFurniture=createAntiqueFurniture({scene,INCH,box,rod,cylinder,m,materials:photoMaterials});
 const inspired=createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photoMaterials});
+const refinedSoftgoods=await installRefinedSoftgoods(inspired);
 const vaulted=createVaultedCeiling({scene,INCH,box,rod,cylinder,m,paint,trim,glowTexture,reflections});
+const bakedLighting=window.ROOM_BAKE_EXPORT?{metadata:null,setLighting(){}}:await installBakedLighting(scene);
 const floorOriginals=oakMats.map(mat=>({map:mat.map,roughness:mat.roughness}));
 let activeDesign=1;
 let yaw=0,pitch=0,dragging=false,lastX=0,lastY=0,fanOn=false,night=false;
@@ -275,31 +278,43 @@ function allowed(x,z){const pad=6*INCH;if(x<pad||z<pad||x>(169*INCH-pad)||z>(187
 function walk(dt){let forward=(keys.has('KeyW')||keys.has('ArrowUp')||touchMoves.has('forward')?1:0)-(keys.has('KeyS')||keys.has('ArrowDown')||touchMoves.has('back')?1:0);let side=(keys.has('KeyD')||keys.has('ArrowRight')||touchMoves.has('right')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')||touchMoves.has('left')?1:0);if(!forward&&!side)return;const len=Math.hypot(forward,side);forward/=len;side/=len;const speed=dt*.9;const x=camera.position.x+(-Math.sin(yaw)*forward+Math.cos(yaw)*side)*speed,z=camera.position.z+(-Math.cos(yaw)*forward-Math.sin(yaw)*side)*speed;if(allowed(x,camera.position.z))camera.position.x=x;if(allowed(camera.position.x,z))camera.position.z=z;}
 function lighting(evening){
   night=evening;
+  const enhanced=activeDesign===4;
+  bakedLighting.setLighting(evening,enhanced);
   scene.background=evening?new THREE.Color('#000000'):skybox;
   exterior.visible=!evening;
   nightExterior.visible=evening;
-  hemi.intensity=evening?.2:1.3;
-  sun.intensity=evening?0:3;
-  windowLights.forEach((l,i)=>l.intensity=evening||(i===2&&activeDesign===1)?0:14);
+  hemi.intensity=enhanced?.025:(evening?.2:1.3);
+  hemi.visible=!enhanced;sun.visible=!enhanced;
+  sun.intensity=enhanced||evening?0:3;
+  windowLights.forEach((l,i)=>l.intensity=enhanced||evening||(i===2&&activeDesign===1)?0:14);
+  windowLights.forEach(light=>light.visible=!enhanced);
   windowGlazing.forEach(mat=>{mat.opacity=evening?.045:.035;mat.color.set(evening?'#b2c3d0':'#e2eef3');});
   windowGlows.forEach(mat=>mat.opacity=evening?0:.025);
   closedWestShutters.visible=false;
   shutters.forEach(group=>group.visible=activeDesign===1);
   fanLight.intensity=activeDesign===1?(evening?14:5):0;
+  fanLight.visible=activeDesign===1;
   lamps.forEach(l=>l.intensity=activeDesign===1?(evening?4:1.2):0);
+  lamps.forEach(light=>light.visible=activeDesign===1);
   inspired.setLighting(evening);
-  vaulted.setLighting(evening);
+  vaulted.setLighting(evening,enhanced);
+  for(const light of [...inspired.lights,...inspired.galleryLights])light.visible=!enhanced;
+  hallLight.visible=!enhanced;
+  if(enhanced){for(const light of [...inspired.lights,...inspired.galleryLights])light.intensity=0;hallLight.intensity=0;}
+  else hallLight.intensity=18;
   globeMat.emissiveIntensity=evening?1.7:.3;
-  renderer.toneMappingExposure=evening?1.1:.95;
+  renderer.toneMapping=enhanced?THREE.AgXToneMapping:THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=enhanced?1:(evening?1.1:.95);
   $('day-night').textContent=evening?'☾ Night':'☀ Day';
   $('day-night').setAttribute('aria-pressed',String(evening));
   $('day-night').setAttribute('aria-label',evening?'Switch to day':'Switch to night');
-  reflections.update();
+  reflections.update({environment:activeDesign>=2});
 }
 $('day-night').onclick=()=>lighting(!night);
 function setDesign(number){
   if(![1,2,3,4].includes(number))return;
   activeDesign=number;const redesign=number>=2,vault=number>=3;
+  photoMaterials.setQuality(redesign);
   furniture.visible=!redesign;fanGroup.visible=!redesign;inspired.group.visible=redesign;
   north.visible=!redesign;doubleNorth.visible=redesign;
   entryWall.visible=!redesign;originalEntryDoor.visible=!redesign;
@@ -357,4 +372,4 @@ const initialDesign=Number(new URLSearchParams(location.search).get('design')||1
 setDesign([1,2,3,4].includes(initialDesign)?initialDesign:1);
 renderer.render(scene,camera);$('loading').remove();requestAnimationFrame(animate);
 // Read-only scene access is useful when checking dimensions and browser rendering.
-window.roomStudy={scene,camera,renderer,ROOM,colliders,photoFloor,photoMaterials,antiqueFurniture,setView,allowed,lighting,setDesign,inspired,vaulted,ceiling,get activeDesign(){return activeDesign;}};
+window.roomStudy={scene,camera,renderer,ROOM,colliders,photoFloor,photoMaterials,antiqueFurniture,setView,allowed,lighting,setDesign,inspired,vaulted,ceiling,quality:{refinedSoftgoods,bakedLighting:bakedLighting.metadata},get activeDesign(){return activeDesign;}};

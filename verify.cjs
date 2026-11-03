@@ -7,7 +7,7 @@ const fs = require('node:fs');
   const page=await browser.newPage({viewport:{width:1600,height:1000}});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   await page.goto('http://127.0.0.1:8000');
-  await page.waitForFunction(()=>!!window.roomStudy,{timeout:60000});
+  await page.waitForFunction(()=>!!window.roomStudy,null,{timeout:120000});
   await page.screenshot({path:'previews/entrance.png'});
   const facts=await page.evaluate(()=>({room:roomStudy.ROOM,meshes:roomStudy.renderer.info.render.calls,triangles:roomStudy.renderer.info.render.triangles,cameraAllowed:roomStudy.allowed(roomStudy.camera.position.x,roomStudy.camera.position.z)}));
   const backdrop=await page.evaluate(()=>{const exterior=roomStudy.scene.getObjectByName('exterior');return {type:exterior.userData.type,patches:exterior.children.length,loaded:exterior.children.every(p=>!!p.material.uniforms.photograph.value.image)};});

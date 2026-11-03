@@ -8,6 +8,9 @@ node_modules/
 .env
 .env.*
 *.log
+*.blend1
+*.blend2
+Textures/Lighting/*.png
 
 # Unused original photos stay on this computer; the room uses baked textures.
 Images/Inspiration/

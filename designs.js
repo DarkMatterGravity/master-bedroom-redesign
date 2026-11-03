@@ -74,14 +74,15 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
   const solids=[],lights=[];
   const addCollider=(x,z,w,d)=>solids.push({x:x*INCH,z:z*INCH,w:w*INCH/2,d:d*INCH/2});
   const linenMaps=surface('linen','#ede8dc',7),walnutMaps=surface('wood','#725039',1),plasterMaps=surface('plaster','#ffffff',6),rugMaps=surface('rug','#b8b1a1',14);
-  const linen=m('#ffffff',.95,linenMaps),white=m('#fffaf0',.95,surface('linen','#f3efe5',8));
-  const curtainLinen=m('#ffffff',.95,surface('linen','#9c8c75',7));
-  const slate=m('#ffffff',.95,surface('linen','#737e87',8));
+  const fabric=(maps,sheenColor)=>new THREE.MeshPhysicalMaterial({color:'#ffffff',roughness:.94,...maps,normalScale:new THREE.Vector2(.075,.075),sheen:.32,sheenRoughness:.85,sheenColor});
+  const linen=m('#ffffff',.95,linenMaps),white=fabric(surface('linen','#f3efe5',8),'#ded8ca');
+  const curtainLinen=fabric(surface('linen','#9c8c75',7),'#ae9f88');
+  const slate=fabric(surface('linen','#737e87',8),'#89939a');
   const walnut=m('#ffffff',.65,walnutMaps),brass=m('#a5884b',.32,{metalness:.8}),iron=m('#292d2b',.45,{metalness:.6});
   const fixtureBlack=m('#111412',.58,{metalness:.25}),frameBlack=m('#171916',.45,{metalness:.15});
   const panelPaint=m('#d8cebf',.75,{normalMap:plasterMaps.normalMap,normalScale:new THREE.Vector2(.16,.16),roughnessMap:plasterMaps.roughnessMap});
   const railPaint=m('#d8cebf',.55),chairHeight=60;
-  const patterned=m('#ffffff',.93,{...surface('linen','#ffffff',8),map:patternedMap()});
+  const patterned=fabric({...surface('linen','#ffffff',8),map:patternedMap()},'#c1c4bf');
   const floorFinish=surface('wood','#a58b69',1);
 
   // Applied paneling fits the measured openings; it never covers either window.
@@ -138,15 +139,15 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
   for(let i=0;i<p.count;i++){const x=p.getX(i)/INCH,z=p.getZ(i)/INCH;const edge=Math.max(0,Math.abs(x)-36),foot=Math.max(0,-z-28);
     const folds=Math.sin(x*.32+z*.09)*.35+Math.sin(z*.38+x*.11)*.22+Math.sin(x*.7+z*.2)*.08;
     p.setY(i,Math.max(14,26.5-edge*1.65-foot*1.35+folds)*INCH);
-  }duvetGeo.computeVertexNormals();const duvet=new THREE.Mesh(duvetGeo,white);duvet.position.set(62*INCH,0,137*INCH);duvet.castShadow=duvet.receiveShadow=true;group.add(duvet);
-  for(const x of [43,81]){const pillow=box(33,7,18,x,29,173,white,group,3.1);pillow.rotation.x=.18;}
-  for(const x of [48,76]){const pillow=box(19,16,6,x,35,163,patterned,group,2.4);pillow.rotation.x=-.12;pillow.rotation.z=x<62?.07:-.07;}
-  box(30,8,5,62,31,158,slate,group,2);
+  }duvetGeo.computeVertexNormals();const duvet=new THREE.Mesh(duvetGeo,white);duvet.position.set(62*INCH,0,137*INCH);duvet.castShadow=duvet.receiveShadow=true;duvet.name='soft-duvet';duvet.userData.softgoods='white';group.add(duvet);
+  for(const x of [43,81]){const pillow=box(33,7,18,x,29,173,white,group,3.1);pillow.name='soft-sleeping-pillow-'+x;pillow.userData.softgoods='white';pillow.rotation.x=.18;}
+  for(const x of [48,76]){const pillow=box(19,16,6,x,35,163,patterned,group,2.4);pillow.name='soft-accent-pillow-'+x;pillow.userData.softgoods='pattern';pillow.rotation.x=-.12;pillow.rotation.z=x<62?.07:-.07;}
+  const bolster=box(30,8,5,62,31,158,slate,group,2);bolster.name='soft-bolster';bolster.userData.softgoods='slate';
   // Slate throw laid across the foot, following the duvet's draped sides.
   const throwGeo=new THREE.PlaneGeometry(79*INCH,18*INCH,100,25);throwGeo.rotateX(-Math.PI/2);
   const tp=throwGeo.attributes.position;
   for(let i=0;i<tp.count;i++){const x=tp.getX(i)/INCH,z=tp.getZ(i)/INCH;tp.setY(i,(27.8-Math.max(0,Math.abs(x)-36)*1.65+Math.sin(z*.7+x*.08)*.18)*INCH);}throwGeo.computeVertexNormals();
-  const blanket=new THREE.Mesh(throwGeo,slate);blanket.position.set(62*INCH,0,116*INCH);blanket.castShadow=blanket.receiveShadow=true;group.add(blanket);
+  const blanket=new THREE.Mesh(throwGeo,slate);blanket.position.set(62*INCH,0,116*INCH);blanket.castShadow=blanket.receiveShadow=true;blanket.name='soft-throw';blanket.userData.softgoods='slate';group.add(blanket);
   addCollider(62,143,84,84);
 
   // White horizontal shiplap forms the complete feature wall.
@@ -226,13 +227,13 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
         p.setZ(i,(fold*(.35+.85*(1-t))+Math.sin(v*.055+side)*.14*(1-t))*INCH);
         p.setY(i,(v+Math.cos(u*2*Math.PI/7.5)*.1*(1-t)**4)*INCH);
       }geo.computeVertexNormals();
-      const mat=curtainLinen.clone();mat.side=THREE.DoubleSide;const panel=new THREE.Mesh(geo,mat);panel.name='soft-s-fold-curtain';panel.position.set(side*offset*INCH,48.5*INCH,4*INCH);panel.castShadow=panel.receiveShadow=true;g.add(panel);
+      const mat=curtainLinen.clone();mat.side=THREE.DoubleSide;const panel=new THREE.Mesh(geo,mat);panel.name='soft-s-fold-curtain';panel.userData.softgoods='curtain';panel.position.set(side*offset*INCH,48.5*INCH,4*INCH);panel.castShadow=panel.receiveShadow=true;g.add(panel);
       for(let u=-5;u<=5;u+=2){const ring=new THREE.Mesh(new THREE.TorusGeometry(.6*INCH,.09*INCH,6,16),brass);ring.position.set((side*offset+u)*INCH,88.5*INCH,4*INCH);g.add(ring);}
     }
   }curtains(60.5,0,0,71);curtains(0,42,Math.PI/2);
 
   const ceilingFixture=new THREE.Group();group.add(ceilingFixture);
-  return {group,bedFrame,ceilingFixture,featureWall,painting,tallPainting,galleryFixture,galleryLights,colliders:solids,lights,plasterMaps,floorFinish,bedSize:[76,80],
+  return {group,bedFrame,ceilingFixture,featureWall,painting,tallPainting,galleryFixture,galleryLights,colliders:solids,lights,plasterMaps,floorFinish,bedSize:[76,80],fabricMaterials:{white,pattern:patterned,slate,curtain:curtainLinen},
     setFeatureHeight(height){
       featureBase.scale.y=height/96;featureBase.position.y=height/2*INCH;
       for(const {board,bottom} of featureBoards){

@@ -6,6 +6,7 @@ export function createWindowReflections(scene,renderer){
   const target=new THREE.WebGLCubeRenderTarget(128,{type:THREE.HalfFloatType,generateMipmaps:true,minFilter:THREE.LinearMipmapLinearFilter});
   const capture=new THREE.CubeCamera(.03,60,target);capture.position.set(62*.0254,60*.0254,90*.0254);scene.add(capture);
   const layers=[];
+  const pmrem=new THREE.PMREMGenerator(renderer);let roomEnvironment=null;
   const material=new THREE.ShaderMaterial({
     uniforms:{roomReflection:{value:target.texture}},transparent:true,depthWrite:false,side:THREE.DoubleSide,
     vertexShader:`varying vec3 worldPoint; varying vec3 worldNormal;
@@ -23,7 +24,10 @@ export function createWindowReflections(scene,renderer){
   return {
     layers,
     addPane(parent,width,height,x,y,z){const pane=new THREE.Mesh(new THREE.PlaneGeometry(width*.0254,height*.0254),material);pane.name='window-reflection';pane.position.set(x*.0254,y*.0254,z*.0254);pane.renderOrder=1;parent.add(pane);layers.push(pane);return pane;},
-    update(){const visibility=layers.map(layer=>layer.visible);layers.forEach(layer=>layer.visible=false);
-      try{capture.update(renderer,scene);}finally{layers.forEach((layer,i)=>layer.visible=visibility[i]);}}
+    update({environment=false}={}){const visibility=layers.map(layer=>layer.visible);layers.forEach(layer=>layer.visible=false);
+      scene.environment=null;
+      try{capture.update(renderer,scene);
+        if(environment){const next=pmrem.fromCubemap(target.texture);roomEnvironment?.dispose();roomEnvironment=next;scene.environment=next.texture;scene.environmentIntensity=.25;}
+      }finally{layers.forEach((layer,i)=>layer.visible=visibility[i]);}}
   };
 }

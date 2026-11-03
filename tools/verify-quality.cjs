@@ -1,0 +1,28 @@
+const {chromium}=require(process.env.PLAYWRIGHT_PATH||'playwright');
+const fs=require('node:fs');
+let browser;
+(async()=>{
+  browser=await chromium.launch({channel:'chrome',headless:true,args:['--enable-webgl','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+  const page=await browser.newPage({viewport:{width:1500,height:1000}}),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+  const start=Date.now();await page.goto(process.env.ROOM_URL||'http://127.0.0.1:8000/?design=4');await page.waitForFunction(()=>!!window.roomStudy,null,{timeout:120000});
+  const loadMs=Date.now()-start;
+  const facts=await page.evaluate(()=>{const r=roomStudy;let refined=0,baked=0;r.quality.refinedSoftgoods.traverse(o=>{if(o.isMesh)refined++;});r.scene.traverseVisible(o=>{if(o.isMesh&&o.material?.lightMap)baked++;});return {refined,baked,bake:r.quality.bakedLighting,environment:!!r.scene.environment,triangles:r.renderer.info.render.triangles};});
+  await page.evaluate(()=>{const r=roomStudy;r.camera.position.set(62*.0254,62*.0254,82*.0254);r.camera.lookAt(62*.0254,37*.0254,182*.0254);r.camera.fov=64;r.camera.updateProjectionMatrix();});
+  await page.screenshot({path:'previews/quality-day-bed.png'});
+  await page.click('#day-night');await page.screenshot({path:'previews/quality-night-bed.png'});
+  await page.evaluate(()=>{roomStudy.camera.position.set(90*.0254,62*.0254,102*.0254);roomStudy.camera.lookAt(15*.0254,60*.0254,15*.0254);});
+  await page.screenshot({path:'previews/quality-night-windows.png'});
+  await page.click('#day-night');await page.screenshot({path:'previews/quality-day-windows.png'});
+  await page.click('[data-design="1"]');
+  const original=await page.evaluate(()=>{const r=roomStudy;let lightmaps=0;r.scene.traverseVisible(o=>{if(o.material?.lightMap)lightmaps++;});return {active:r.activeDesign,environment:r.scene.environment,lightmaps};});
+  await page.click('[data-design="4"]');
+  if(facts.refined!==16||facts.baked<800||!facts.environment||original.active!==1||original.environment||original.lightmaps)errors.push('Quality/before isolation failed');
+  await page.close();
+  const mobile=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:2});mobile.on('pageerror',e=>errors.push(e.message));
+  await mobile.goto(process.env.ROOM_URL||'http://127.0.0.1:8000/?design=4');await mobile.waitForFunction(()=>!!window.roomStudy,null,{timeout:120000});
+  const mobileFacts=await mobile.evaluate(()=>{const r=roomStudy;let atlas=0;r.scene.traverseVisible(o=>{if(o.material?.lightMap)atlas=o.material.lightMap.image.width;});return {atlas,overflow:document.documentElement.scrollWidth>innerWidth,triangles:r.renderer.info.render.triangles};});
+  await mobile.screenshot({path:'previews/quality-mobile.png'});if(mobileFacts.atlas!==1024||mobileFacts.overflow)errors.push('Mobile quality tier failed');
+  const result={loadMs,facts,original,mobileFacts,errors};fs.writeFileSync('previews/quality-check.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+  await browser.close();if(errors.length)process.exitCode=1;
+})().catch(async e=>{console.error(e);await browser?.close();process.exitCode=1;});

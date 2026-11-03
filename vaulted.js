@@ -95,5 +95,5 @@ export function createVaultedCeiling({scene,INCH,box,rod,cylinder,m,paint,trim,g
   const highFill=new THREE.PointLight('#e2f0ff',6,4,2);highFill.position.set(5*INCH,wy*INCH,163*INCH);group.add(highFill);
 
   return {group,boards,flatCap,bedWall,gableWall,highWindow,height,peak,ridgeZ,pitchDegrees:30,rearPitchDegrees:30,
-    setLighting(night){daySky.visible=!night;nightSky.visible=night;highGlass.color.set(night?'#b2c3d0':'#e2eef3');highGlass.opacity=night?.045:.035;highGlowMat.opacity=night?0:.025;highFill.intensity=night?0:6;}};
+    setLighting(night,baked=false){daySky.visible=!night;nightSky.visible=night;highGlass.color.set(night?'#b2c3d0':'#e2eef3');highGlass.opacity=night?.045:.035;highGlowMat.opacity=night?0:.025;highFill.intensity=night||baked?0:6;highFill.visible=!baked;}};
 }

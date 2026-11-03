@@ -9,6 +9,11 @@ nighttime sweep, with the front-window plantation shutters open.
 The upper window shows blue sky and treetops by day and the matching dark
 canopy at night, cropped from the actual video captures.
 
+The After view now uses Blender-refined fabrics and baked day/night lighting,
+with HDR room reflections, soft fabric sheen, and subtle wood varnish. Smaller
+light maps are selected for phones. The editable assets and rebuild steps are
+documented in [tools/README.md](tools/README.md).
+
 To run locally, double-click **Start-Room.cmd** on Windows, or run `python serve.py` in this folder.
 The server opens http://127.0.0.1:8000 in your browser. Keep its terminal window open.
 Python 3 and a browser with WebGL 2 are required. Three.js is included locally;

@@ -9,8 +9,8 @@ export function createPhotoMaterials(){
   function maps(prefix){return {map:texture(`./Textures/${prefix}-albedo.png`,true),normalMap:texture(`./Textures/${prefix}-normal.png`),roughnessMap:texture(`./Textures/${prefix}-roughness.png`),aoMap:texture(`./Textures/${prefix}-ao.png`),displacementMap:texture(`./Textures/${prefix}-height.png`)};}
   const floorMaps=maps('floor'),woodMaps=maps('antique-wood');
   const familyPhoto=texture('./Images/References/Family-portrait.jpg',true);
-  const floor=new THREE.MeshStandardMaterial({color:'#e6ded2',roughness:1,...floorMaps,normalScale:new THREE.Vector2(.8,.8),aoMapIntensity:.22,displacementScale:.00065,displacementBias:-.000325});
-  const wood=new THREE.MeshStandardMaterial({color:'#d2d7dc',roughness:1,map:woodMaps.map,normalMap:woodMaps.normalMap,roughnessMap:woodMaps.roughnessMap,aoMap:woodMaps.aoMap,aoMapIntensity:.18,normalScale:new THREE.Vector2(.65,.65),bumpMap:woodMaps.displacementMap,bumpScale:.00018});
+  const floor=new THREE.MeshPhysicalMaterial({color:'#e6ded2',roughness:1,...floorMaps,normalScale:new THREE.Vector2(.8,.8),aoMapIntensity:.22,displacementScale:.00065,displacementBias:-.000325});
+  const wood=new THREE.MeshPhysicalMaterial({color:'#d2d7dc',roughness:1,map:woodMaps.map,normalMap:woodMaps.normalMap,roughnessMap:woodMaps.roughnessMap,aoMap:woodMaps.aoMap,aoMapIntensity:.18,normalScale:new THREE.Vector2(.65,.65),bumpMap:woodMaps.displacementMap,bumpScale:.00018});
   const darkWood=wood.clone();darkWood.color.set('#b4b8bd');darkWood.roughness=.92;
   const verticalWood=wood.clone();
   for(const key of ['map','normalMap','roughnessMap','aoMap','bumpMap']){verticalWood[key]=wood[key].clone();verticalWood[key].center.set(.5,.5);verticalWood[key].rotation=Math.PI/2;verticalWood[key].needsUpdate=true;}
@@ -34,7 +34,12 @@ export function createPhotoMaterials(){
     for(const key of ['map','normalMap','roughnessMap','aoMap','bumpMap']){verticalWood[key].image=wood[key].image;verticalWood[key].needsUpdate=true;}
     floor.needsUpdate=wood.needsUpdate=darkWood.needsUpdate=verticalWood.needsUpdate=true;
   });
-  return {floor,wood,darkWood,verticalWood,familyPhoto,ready};
+  return {floor,wood,darkWood,verticalWood,familyPhoto,ready,
+    setQuality(enabled){
+      floor.roughness=enabled?.68:1;floor.clearcoat=enabled?.24:0;floor.clearcoatRoughness=.4;floor.normalScale.setScalar(enabled?.35:.8);
+      for(const material of [wood,darkWood,verticalWood]){material.roughness=enabled?.7:(material===darkWood?.92:1);material.clearcoat=enabled?.18:0;material.clearcoatRoughness=.38;material.normalScale.setScalar(enabled?.3:.45);material.needsUpdate=true;}
+      floor.needsUpdate=true;
+    }};
 }
 
 export function createPhotoFloor(scene,material){
