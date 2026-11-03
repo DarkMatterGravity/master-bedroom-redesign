@@ -80,8 +80,8 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
   const slate=fabric(surface('linen','#737e87',8),'#89939a');
   const walnut=m('#ffffff',.65,walnutMaps),brass=m('#a5884b',.32,{metalness:.8}),iron=m('#292d2b',.45,{metalness:.6});
   const fixtureBlack=m('#111412',.58,{metalness:.25}),frameBlack=m('#171916',.45,{metalness:.15});
-  const panelPaint=m('#d8cebf',.75,{normalMap:plasterMaps.normalMap,normalScale:new THREE.Vector2(.16,.16),roughnessMap:plasterMaps.roughnessMap});
-  const railPaint=m('#d8cebf',.55),chairHeight=60;
+  const panelPaint=m('#eeeae4',.42,{normalMap:plasterMaps.normalMap,normalScale:new THREE.Vector2(.16,.16),roughnessMap:plasterMaps.roughnessMap});
+  const railPaint=m('#eeeae4',.6),chairHeight=60;
   const patterned=fabric({...surface('linen','#ffffff',8),map:patternedMap()},'#c1c4bf');
   const floorFinish=surface('wood','#a58b69',1);
 
@@ -153,7 +153,7 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
   // White horizontal shiplap forms the complete feature wall.
   const featureWall=new THREE.Group();featureWall.name='white-shiplap-bed-feature-wall';group.add(featureWall);
   const featureBase=box(124,96,.3,62,48,186.65,m('#d0cec4',.9),featureWall);
-  const shiplapPaint=m('#f2f0e7',.72,{normalMap:walnutMaps.normalMap,normalScale:new THREE.Vector2(.09,.09),roughnessMap:plasterMaps.roughnessMap});
+  const shiplapPaint=m('#f2f0e7',.42,{normalMap:walnutMaps.normalMap,normalScale:new THREE.Vector2(.09,.09),roughnessMap:plasterMaps.roughnessMap});
   const featureBoards=[];
   for(let bottom=0,row=0;bottom<192;bottom+=5.5,row++){
     const split=row%2?79:47;

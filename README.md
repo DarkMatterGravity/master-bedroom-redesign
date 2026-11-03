@@ -13,6 +13,9 @@ The After view now uses Blender-refined fabrics and baked day/night lighting,
 with HDR room reflections, soft fabric sheen, and subtle wood varnish. Smaller
 light maps are selected for phones. The editable assets and rebuild steps are
 documented in [tools/README.md](tools/README.md).
+Walls and panel faces use soft-white satin paint; mouldings use an eggshell
+finish. Continuous light-map charts and surface-specific smoothing keep the
+painted areas free from triangle-shaped lighting seams and blotches.
 
 To run locally, double-click **Start-Room.cmd** on Windows, or run `python serve.py` in this folder.
 The server opens http://127.0.0.1:8000 in your browser. Keep its terminal window open.

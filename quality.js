@@ -18,18 +18,20 @@ export async function installRefinedSoftgoods(inspired){
   inspired.group.add(asset.scene);return asset.scene;
 }
 
+const lightingAsset=path=>`${path}?v=20261103-smooth-light`;
+
 export async function installBakedLighting(scene){
   const [manifest,buffer,clothDay,clothNight]=await Promise.all([
-    fetch('./Textures/Lighting/manifest.json').then(r=>{if(!r.ok)throw new Error('Room lighting manifest missing');return r.json();}),
-    fetch('./Textures/Lighting/room-uv.bin').then(r=>{if(!r.ok)throw new Error('Room lighting UVs missing');return r.arrayBuffer();}),
-    fetch('./Textures/Lighting/cloth-day.bin').then(r=>r.arrayBuffer()),
-    fetch('./Textures/Lighting/cloth-night.bin').then(r=>r.arrayBuffer())
+    fetch(lightingAsset('./Textures/Lighting/manifest.json')).then(r=>{if(!r.ok)throw new Error('Room lighting manifest missing');return r.json();}),
+    fetch(lightingAsset('./Textures/Lighting/room-uv.bin')).then(r=>{if(!r.ok)throw new Error('Room lighting UVs missing');return r.arrayBuffer();}),
+    fetch(lightingAsset('./Textures/Lighting/cloth-day.bin')).then(r=>r.arrayBuffer()),
+    fetch(lightingAsset('./Textures/Lighting/cloth-night.bin')).then(r=>r.arrayBuffer())
   ]);
   const loader=new HDRLoader(),textures={};
   const mobile=matchMedia('(max-width: 700px)').matches;
   await Promise.all(['day','night'].map(async mode=>{
     const image=mobile?manifest.modes[mode].mobileImage:manifest.modes[mode].image;
-    const texture=await loader.loadAsync(`./Textures/Lighting/${image}`);
+    const texture=await loader.loadAsync(lightingAsset(`./Textures/Lighting/${image}`));
     texture.channel=1;texture.anisotropy=4;textures[mode]=texture;
   }));
   const entries=[],uvs=new Float32Array(buffer),cloth={day:new Uint16Array(clothDay),night:new Uint16Array(clothNight)};

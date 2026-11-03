@@ -14,6 +14,16 @@ let browser;
   await page.evaluate(()=>{roomStudy.camera.position.set(90*.0254,62*.0254,102*.0254);roomStudy.camera.lookAt(15*.0254,60*.0254,15*.0254);});
   await page.screenshot({path:'previews/quality-night-windows.png'});
   await page.click('#day-night');await page.screenshot({path:'previews/quality-day-windows.png'});
+  const finish=await page.evaluate(()=>{const r=roomStudy,panel=r.inspired.group.getObjectByName('blue-wainscoting'),trim=r.vaulted.highWindow.getObjectByName('mitered-picture-frame').children[0];return {wallColor:panel.children[0].material.color.getHexString(),wallRoughness:panel.children[0].material.roughness,mouldingRoughness:panel.children[1].material.roughness,trimRoughness:trim.material.roughness};});
+  if(finish.wallColor!=='eeeae4'||finish.wallRoughness!==.42||finish.mouldingRoughness!==.6||finish.trimRoughness!==.6)errors.push('Soft-white satin/eggshell finishes failed');
+  for(const mode of ['day','night']){
+    if(mode==='night')await page.click('#day-night');
+    for(const [name,position,target] of [['gable',[87,65,109],[0,105,130]],['door',[100,64,92],[146,68,120]],['corner',[90,70,125],[124,133,170]],['base',[26,44,65],[0,15,42]],['upper-trim',[65,108,142],[0,140,163]]]){
+      await page.evaluate(({position,target})=>{const r=roomStudy;r.camera.position.set(...position.map(n=>n*.0254));r.camera.lookAt(...target.map(n=>n*.0254));r.camera.fov=60;r.camera.updateProjectionMatrix();},{position,target});
+      await page.screenshot({path:`previews/smooth-${mode}-${name}.png`});
+    }
+  }
+  await page.click('#day-night');
   await page.click('[data-design="1"]');
   const original=await page.evaluate(()=>{const r=roomStudy;let lightmaps=0;r.scene.traverseVisible(o=>{if(o.material?.lightMap)lightmaps++;});return {active:r.activeDesign,environment:r.scene.environment,lightmaps};});
   await page.click('[data-design="4"]');
@@ -23,6 +33,6 @@ let browser;
   await mobile.goto(process.env.ROOM_URL||'http://127.0.0.1:8000/?design=4');await mobile.waitForFunction(()=>!!window.roomStudy,null,{timeout:120000});
   const mobileFacts=await mobile.evaluate(()=>{const r=roomStudy;let atlas=0;r.scene.traverseVisible(o=>{if(o.material?.lightMap)atlas=o.material.lightMap.image.width;});return {atlas,overflow:document.documentElement.scrollWidth>innerWidth,triangles:r.renderer.info.render.triangles};});
   await mobile.screenshot({path:'previews/quality-mobile.png'});if(mobileFacts.atlas!==1024||mobileFacts.overflow)errors.push('Mobile quality tier failed');
-  const result={loadMs,facts,original,mobileFacts,errors};fs.writeFileSync('previews/quality-check.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+  const result={loadMs,facts,finish,original,mobileFacts,errors};fs.writeFileSync('previews/quality-check.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
   await browser.close();if(errors.length)process.exitCode=1;
 })().catch(async e=>{console.error(e);await browser?.close();process.exitCode=1;});

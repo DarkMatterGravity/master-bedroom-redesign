@@ -1,12 +1,12 @@
 import * as THREE from './vendor/three.module.js';
-import { createInspiredDesign } from './designs.js?v=20261103-quality';
+import { createInspiredDesign } from './designs.js?v=20261103-smooth-light';
 import { createVaultedCeiling } from './vaulted.js?v=20261103-quality';
 import { createWindowReflections } from './glass.js?v=20261103-quality';
 import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js?v=20261103-quality';
 import { createAntiqueFurniture } from './antique-furniture.js';
 import { miteredRail, miteredFrameBand } from './joinery.js';
 import { createPhotoExterior } from './exterior.js?v=20261102-night-panorama';
-import { installRefinedSoftgoods, installBakedLighting } from './quality.js?v=20261103-quality';
+import { installRefinedSoftgoods, installBakedLighting } from './quality.js?v=20261103-smooth-light';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.
 const INCH = 0.0254;
@@ -323,11 +323,11 @@ function setDesign(number){
   vaulted.flatCap.visible=number===4;
   inspired.setFeatureHeight(vault?vaulted.height(187):96);
   for(const crown of wallCrowns)for(const mesh of crown.meshes)mesh.visible=(!vault||crown.group===north||crown.group===doubleNorth)&&!(redesign&&crown.group===south);
-  paint.color.set(redesign?'#d8cebf':'#8fa7b7');
+  paint.color.set(redesign?'#eeeae4':'#8fa7b7');paint.roughness=redesign?.42:.75;
   paint.normalMap=redesign?inspired.plasterMaps.normalMap:null;
   paint.roughnessMap=redesign?inspired.plasterMaps.roughnessMap:null;
   paint.normalScale.set(.16,.16);paint.needsUpdate=true;
-  trim.color.set(redesign?'#ede8dc':'#efeee3');ceilingMat.color.set(redesign?'#f0ebe0':'#f3f0e5');
+  trim.color.set(redesign?'#f0ede7':'#efeee3');trim.roughness=redesign?.6:.5;ceilingMat.color.set(redesign?'#f0ebe0':'#f3f0e5');
   oakMats.forEach((mat,i)=>{
     mat.map=redesign?inspired.floorFinish.map:floorOriginals[i].map;
     mat.normalMap=redesign?inspired.floorFinish.normalMap:null;

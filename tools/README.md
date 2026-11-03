@@ -27,7 +27,10 @@ node tools/export-room.cjs --original-softgoods
 & 'C:/Program Files/Blender Foundation/Blender 5.2/blender.exe' -b -t 8 --python tools/refine-softgoods.py
 node tools/export-room.cjs
 & 'C:/Program Files/Blender Foundation/Blender 5.2/blender.exe' -b -t 8 --python tools/bake-room-lighting.py
+python tools/check-lightmap-seams.py
+python tools/smooth-lightmaps.py
 python tools/encode-lightmaps.py
+python tools/stitch-wall-lighting.py
 node tools/verify-quality.cjs
 node verify.cjs
 ```
@@ -35,8 +38,18 @@ node verify.cjs
 The local server must be running. The browser exporter bypasses existing bakes
 so they can be rebuilt after geometry changes. Host Python needs NumPy/OpenCV;
 Blender uses its included Python, CUDA Cycles and Open Image Denoise. The bake
-uses 512 samples and five diffuse bounces, with separate day/night lighting.
+uses 1024 samples and five diffuse bounces, with separate day/night lighting.
 CUDA is selected explicitly for this machine.
+
+The baker welds coincident vertices within each mesh before unwrapping, while
+preserving the original runtime triangle-corner correspondence. Flat surfaces
+therefore share continuous UV charts instead of a separate island per triangle.
+The seam check tests 679 shared edges on the current model. Denoising and
+residual-noise filtering stay inside each chart; world-space wall filtering
+joins lighting across the separate eight-foot walls and vaulted extensions.
+The room's painted walls/panel faces are soft white (`#eeeae4`) with a satin
+roughness of 0.42. Mouldings use an eggshell roughness of 0.6. Before retains
+its original palette and finish settings.
 
 For hand edits in Blender, export the GLB from the edited blend instead of
 rerunning `refine-softgoods.py`, then export the room and rebuild its bakes.

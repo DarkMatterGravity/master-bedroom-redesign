@@ -3,19 +3,15 @@
 Run tools/export-room.cjs first, then Blender --background --python this file.
 The small runtime UV binary preserves the original room's materials and layout.
 """
-import bpy,json,math,struct,time
+import bpy,json,math,time
 from pathlib import Path
 import numpy as np
-import importlib.util
-spec=importlib.util.spec_from_file_location('denoise_lightmap',str(Path(__file__).resolve().parent/'denoise-lightmap.py'))
-denoiser=importlib.util.module_from_spec(spec);spec.loader.exec_module(denoiser)
-from pathlib import Path
 from mathutils import Vector
 
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'Textures/Lighting';OUT.mkdir(exist_ok=True)
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
 source=json.loads((ROOT/'previews/blender-scene.json').read_text())
-scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.samples=512
+scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.samples=1024
 scene.cycles.max_bounces=8;scene.cycles.diffuse_bounces=5;scene.cycles.glossy_bounces=2
 scene.cycles.use_denoising=True
 prefs=bpy.context.preferences.addons['cycles'].preferences
@@ -29,10 +25,21 @@ world=scene.world.node_tree.nodes.get('Background');world.inputs['Color'].defaul
 
 verts=[];faces=[];face_materials=[];smooth=[];records=[];materials=[];material_lookup={}
 for data in source['meshes']:
-    start=len(verts);p=data['positions'];verts.extend((p[i],-p[i+2],p[i+1]) for i in range(0,len(p),3))
+    p=data['positions'];points=np.asarray(p).reshape(-1,3)[:,[0,2,1]]*np.array([1,-1,1])
     indices=data['indices'] or list(range(len(p)//3));count=len(indices)//3
     records.append(dict(id=data['id'],offset=len(faces)*3,count=count*3,softgoods=bool(data['softgoods'])))
-    faces.extend(tuple(start+v for v in indices[i:i+3]) for i in range(0,len(indices),3))
+    # Join coincident vertices on the same flat surface. Three's extruded
+    # trim often repeats vertices for each triangle; leaving those disconnected
+    # makes Smart UV produce a separate light-map island for each half-quad.
+    lookup={}
+    for i in range(0,len(indices),3):
+        triangle=points[indices[i:i+3]];normal=np.cross(triangle[1]-triangle[0],triangle[2]-triangle[0]);length=np.linalg.norm(normal)
+        face=[]
+        for j,index in enumerate(indices[i:i+3]):
+            key=('vertex',index) if data['softgoods'] else tuple(np.round(points[index],6)) if length>1e-12 else ('degenerate',i,j)
+            if key not in lookup:lookup[key]=len(verts);verts.append(tuple(points[index]))
+            face.append(lookup[key])
+        faces.append(tuple(face))
     key=tuple(round(v,4) for v in data['color'])+(round(data['emissiveIntensity'],2),)
     if key not in material_lookup:
         mat=bpy.data.materials.new('Room finish '+str(len(materials)));mat.use_nodes=True
@@ -44,12 +51,18 @@ mesh=bpy.data.meshes.new('Exact room and refined furnishings');mesh.from_pydata(
 room=bpy.data.objects.new('Baked room',mesh);bpy.context.collection.objects.link(room);bpy.context.view_layer.objects.active=room;room.select_set(True)
 for mat in materials:mesh.materials.append(mat)
 for poly,mi,sm in zip(mesh.polygons,face_materials,smooth):poly.material_index=mi;poly.use_smooth=sm
+expected_corners=len(faces)*3
+corner_attribute=mesh.attributes.new(name='RuntimeCorner',type='INT',domain='CORNER')
+corner_attribute.data.foreach_set('value',np.arange(expected_corners,dtype=np.int32))
 mesh.uv_layers.new(name='Lightmap')
 bpy.ops.object.mode_set(mode='EDIT');bpy.ops.mesh.select_all(action='SELECT')
 bpy.ops.uv.smart_project(angle_limit=math.radians(66),island_margin=.004,area_weight=.7,correct_aspect=True,scale_to_bounds=True)
 bpy.ops.object.mode_set(mode='OBJECT')
 uv=mesh.uv_layers.active.data
-values=np.empty(len(uv)*2,dtype=np.float32);uv.foreach_get('uv',values);values.tofile(OUT/'room-uv.bin')
+corner_ids=np.empty(len(mesh.loops),dtype=np.int32);mesh.attributes['RuntimeCorner'].data.foreach_get('value',corner_ids)
+if len(np.unique(corner_ids))!=expected_corners:raise RuntimeError('UV unwrap changed the runtime triangle correspondence')
+values=np.empty(len(uv)*2,dtype=np.float32);uv.foreach_get('uv',values)
+runtime_uv=np.empty((expected_corners,2),dtype=np.float32);runtime_uv[corner_ids]=values.reshape(-1,2);runtime_uv.tofile(OUT/'room-uv.bin')
 print('BAKE_GEOMETRY',len(verts),len(faces),'UV loops',len(uv),flush=True)
 
 I=.0254
@@ -76,7 +89,7 @@ atlas.colorspace_settings.name='Non-Color'
 for mat in materials:
     node=mat.node_tree.nodes.new('ShaderNodeTexImage');node.image=atlas;mat.node_tree.nodes.active=node
 scene.render.bake.margin=8;scene.render.bake.use_clear=True
-metadata={'size':2048,'records':records,'modes':{},'geometry':'day/night diffuse lighting, Blender Cycles 512 samples, 5 diffuse bounces'}
+metadata={'size':2048,'records':records,'modes':{},'geometry':'day/night diffuse lighting, Blender Cycles 1024 samples, 5 diffuse bounces'}
 for mode in ['day','night']:
     scene.render.bake.target='IMAGE_TEXTURES'
     for obj in day:obj.hide_render=mode!='day'
@@ -85,7 +98,7 @@ for mode in ['day','night']:
     print('BAKE_START',mode,flush=True);started=time.time()
     bpy.ops.object.bake(type='DIFFUSE',pass_filter={'DIRECT','INDIRECT'},use_clear=True)
     pixels=np.empty(2048*2048*4,dtype=np.float32);atlas.pixels.foreach_get(pixels)
-    rgb=pixels.reshape(-1,4)[:,:3];rgb[:]=denoiser.denoise(rgb.reshape(2048,2048,3)).reshape(-1,3);positive=rgb[np.max(rgb,axis=1)>.00001]
+    rgb=pixels.reshape(-1,4)[:,:3];positive=rgb[np.max(rgb,axis=1)>.00001]
     if not positive.size:raise RuntimeError('Lighting bake returned no illumination; check the Cycles device log')
     np.save(ROOT/'previews'/f'light-{mode}.npy',np.maximum(rgb.reshape(2048,2048,3),0))
     maximum=max(.125,float(np.quantile(positive,.9995))) if positive.size else 1
@@ -101,6 +114,7 @@ for mode in ['day','night']:
     mesh.color_attributes.active_color=attribute
     bpy.ops.object.bake(type='DIFFUSE',pass_filter={'DIRECT','INDIRECT'},use_clear=True)
     colors=np.empty(len(mesh.loops)*4,dtype=np.float32);attribute.data.foreach_get('color',colors);colors=colors.reshape(-1,4)
+    runtime_colors=np.empty((expected_corners,4),dtype=np.float32);runtime_colors[corner_ids]=colors;colors=runtime_colors
     cloth=[];vertex_offset=0
     for record in records:
         if record['softgoods']:
