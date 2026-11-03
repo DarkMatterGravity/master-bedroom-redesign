@@ -1,12 +1,12 @@
 import * as THREE from './vendor/three.module.js';
-import { createInspiredDesign } from './designs.js?v=20261103-smooth-light';
+import { createInspiredDesign } from './designs.js?v=20261103-bedding';
 import { createVaultedCeiling } from './vaulted.js?v=20261103-coverage';
 import { createWindowReflections } from './glass.js?v=20261103-quality';
 import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js?v=20261103-quality';
 import { createAntiqueFurniture } from './antique-furniture.js';
 import { miteredRail, miteredFrameBand } from './joinery.js';
 import { createPhotoExterior } from './exterior.js?v=20261103-anchored';
-import { installRefinedSoftgoods, installBakedLighting } from './quality.js?v=20261103-coverage';
+import { installRefinedSoftgoods, installBakedLighting } from './quality.js?v=20261103-bedding';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.
 const INCH = 0.0254;

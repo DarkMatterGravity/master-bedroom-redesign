@@ -38,9 +38,14 @@ function surface(kind,base,repeat=1){
 }
 
 function patternedMap(){
-  const canvas=document.createElement('canvas');canvas.width=canvas.height=256;const c=canvas.getContext('2d');c.fillStyle='#ded9cc';c.fillRect(0,0,256,256);c.fillStyle='#47515a';
-  for(let y=-32;y<288;y+=32)for(let x=-32;x<288;x+=32){const ox=x+(Math.floor(y/32)%2?16:0);c.beginPath();c.moveTo(ox,y);c.lineTo(ox+16,y);c.lineTo(ox+16,y+8);c.lineTo(ox+24,y+8);c.lineTo(ox+24,y+16);c.lineTo(ox+16,y+16);c.lineTo(ox+8,y+24);c.lineTo(ox,y+24);c.lineTo(ox+8,y+16);c.lineTo(ox,y+16);c.closePath();c.fill();}
-  const t=new THREE.CanvasTexture(canvas);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,2);t.anisotropy=8;return t;
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=512;const c=canvas.getContext('2d');c.fillStyle='#ded9cc';c.fillRect(0,0,512,512);c.fillStyle='#47515a';
+  // Four light/four dark warp and weft yarns in a 2/2 twill form a connected
+  // houndstooth check, with the same cream and slate palette as the room.
+  for(let y=0;y<64;y++)for(let x=0;x<64;x++){
+    const warp=Math.floor(x/4)%2===0,weft=Math.floor(y/4)%2===0,over=(x-y+64)%4<2;
+    if(over?warp:weft)c.fillRect(x*8,y*8,8,8);
+  }
+  const t=new THREE.CanvasTexture(canvas);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(.75,.75);t.anisotropy=8;return t;
 }
 
 function landscapePainting(){
@@ -134,19 +139,19 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
     addCollider(x,179,14,14);
   }
   const mattress=box(76,10,80,62,18,143,white,group,2.5);mattress.name='variant-2-king-mattress';
-  const duvetGeo=new THREE.PlaneGeometry(79*INCH,68*INCH,100,86);duvetGeo.rotateX(-Math.PI/2);
+  const duvetGeo=new THREE.PlaneGeometry(84*INCH,72*INCH,100,86);duvetGeo.rotateX(-Math.PI/2);
   const p=duvetGeo.attributes.position;
-  for(let i=0;i<p.count;i++){const x=p.getX(i)/INCH,z=p.getZ(i)/INCH;const edge=Math.max(0,Math.abs(x)-36),foot=Math.max(0,-z-28);
+  for(let i=0;i<p.count;i++){const x=p.getX(i)/INCH,z=p.getZ(i)/INCH;const edge=Math.max(0,Math.abs(x)-37.5),foot=Math.max(0,-z-32);
     const folds=Math.sin(x*.32+z*.09)*.35+Math.sin(z*.38+x*.11)*.22+Math.sin(x*.7+z*.2)*.08;
-    p.setY(i,Math.max(14,26.5-edge*1.65-foot*1.35+folds)*INCH);
+    p.setY(i,Math.max(14,26.5-edge*2.4-foot*2.3+folds)*INCH);
   }duvetGeo.computeVertexNormals();const duvet=new THREE.Mesh(duvetGeo,white);duvet.position.set(62*INCH,0,137*INCH);duvet.castShadow=duvet.receiveShadow=true;duvet.name='soft-duvet';duvet.userData.softgoods='white';group.add(duvet);
-  for(const x of [43,81]){const pillow=box(33,7,18,x,29,173,white,group,3.1);pillow.name='soft-sleeping-pillow-'+x;pillow.userData.softgoods='white';pillow.rotation.x=.18;}
-  for(const x of [48,76]){const pillow=box(19,16,6,x,35,163,patterned,group,2.4);pillow.name='soft-accent-pillow-'+x;pillow.userData.softgoods='pattern';pillow.rotation.x=-.12;pillow.rotation.z=x<62?.07:-.07;}
-  const bolster=box(30,8,5,62,31,158,slate,group,2);bolster.name='soft-bolster';bolster.userData.softgoods='slate';
+  for(const x of [44,80]){const pillow=box(33,21,8,x,37.5,177,white,group,3.1);pillow.name='soft-sleeping-pillow-'+x;pillow.userData.softgoods='white';pillow.rotation.x=.18;pillow.rotation.z=x<62?.025:-.025;}
+  for(const x of [47,77]){const pillow=box(21,20,6.2,x,35.5,166,patterned,group,2.4);pillow.name='soft-accent-pillow-'+x;pillow.userData.softgoods='pattern';pillow.rotation.x=.16;pillow.rotation.z=x<62?.08:-.08;}
+  const bolster=box(26,9,5,62,32,159,slate,group,2);bolster.name='soft-bolster';bolster.userData.softgoods='slate';bolster.rotation.x=.16;
   // Slate throw laid across the foot, following the duvet's draped sides.
-  const throwGeo=new THREE.PlaneGeometry(79*INCH,18*INCH,100,25);throwGeo.rotateX(-Math.PI/2);
+  const throwGeo=new THREE.PlaneGeometry(84*INCH,18*INCH,100,25);throwGeo.rotateX(-Math.PI/2);
   const tp=throwGeo.attributes.position;
-  for(let i=0;i<tp.count;i++){const x=tp.getX(i)/INCH,z=tp.getZ(i)/INCH;tp.setY(i,(27.8-Math.max(0,Math.abs(x)-36)*1.65+Math.sin(z*.7+x*.08)*.18)*INCH);}throwGeo.computeVertexNormals();
+  for(let i=0;i<tp.count;i++){const x=tp.getX(i)/INCH,z=tp.getZ(i)/INCH;tp.setY(i,(27.8-Math.max(0,Math.abs(x)-37.5)*2.4+Math.sin(z*.7+x*.08)*.18)*INCH);}throwGeo.computeVertexNormals();
   const blanket=new THREE.Mesh(throwGeo,slate);blanket.position.set(62*INCH,0,116*INCH);blanket.castShadow=blanket.receiveShadow=true;blanket.name='soft-throw';blanket.userData.softgoods='slate';group.add(blanket);
   addCollider(62,143,84,84);
 

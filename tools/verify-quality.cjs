@@ -18,7 +18,7 @@ let browser;
   if(finish.wallColor!=='eeeae4'||finish.wallRoughness!==.42||finish.mouldingRoughness!==.6||finish.trimRoughness!==.6)errors.push('Soft-white satin/eggshell finishes failed');
   for(const mode of ['day','night']){
     if(mode==='night')await page.click('#day-night');
-    for(const [name,position,target] of [['gable',[87,65,109],[0,105,130]],['door',[100,64,92],[146,68,120]],['corner',[90,70,125],[124,133,170]],['base',[26,44,65],[0,15,42]],['upper-trim',[65,108,142],[0,140,163]],['porch-roof',[25,64,42],[0,32,42]],['street-car',[20,64,40],[0,48,56]],['brown-house',[75,64,25],[91,41,0]],['near-fence',[62,64,15],[62,30,0]]]){
+    for(const [name,position,target] of [['gable',[87,65,109],[0,105,130]],['door',[100,64,92],[146,68,120]],['corner',[90,70,125],[124,133,170]],['base',[26,44,65],[0,15,42]],['upper-trim',[65,108,142],[0,140,163]],['pillow-detail',[62,54,125],[62,39,172]],['duvet-foot',[110,43,84],[84,23,112]],['duvet-side',[112,32,115],[96,22,131]],['porch-roof',[25,64,42],[0,32,42]],['street-car',[20,64,40],[0,48,56]],['brown-house',[75,64,25],[91,41,0]],['near-fence',[62,64,15],[62,30,0]]]){
       await page.evaluate(({position,target})=>{const r=roomStudy;r.camera.position.set(...position.map(n=>n*.0254));r.camera.lookAt(...target.map(n=>n*.0254));r.camera.fov=60;r.camera.updateProjectionMatrix();},{position,target});
       await page.screenshot({path:`previews/smooth-${mode}-${name}.png`});
     }
@@ -45,9 +45,16 @@ let browser;
         if(!ray.intersectObject(back,false).length)exteriorMisses.push({night,position,target});
       }
     }
-    r.lighting(false);return {upperCoverageMisses:misses,exteriorCoverageMisses:exteriorMisses};
+    r.lighting(false);r.scene.updateMatrixWorld(true);
+    const duvet=r.scene.getObjectByName('refined-soft-duvet-0'),throwMesh=r.scene.getObjectByName('refined-soft-throw-6'),mattress=r.scene.getObjectByName('variant-2-king-mattress'),clothMisses=[];
+    const surfaces=[duvet,throwMesh,mattress];let clothRays=0;
+    function clothRay(position,direction){const ray=new T.Raycaster(new T.Vector3(...position.map(v=>v*.0254)),new T.Vector3(...direction)),hit=ray.intersectObjects(surfaces,false)[0];clothRays++;if(hit?.object===mattress)clothMisses.push({position,direction});}
+    for(const x of [24.1,25,26,30,50,62,75,95,98,99,99.9])for(const z of [103.1,104,105,106,110,115,125,145,165])clothRay([x,60,z],[0,-1,0]);
+    for(const x of [26,28,35,62,90,97,98])for(const y of [18,20,22])clothRay([x,y,90],[0,0,1]);
+    for(const z of [106,110,120,140,160])for(const y of [18,20,22]){clothRay([120,y,z],[-1,0,0]);clothRay([4,y,z],[1,0,0]);}
+    return {upperCoverageMisses:misses,exteriorCoverageMisses:exteriorMisses,clothRays,clothMisses};
   });
-  if(coverage.upperCoverageMisses.length||coverage.exteriorCoverageMisses.length)errors.push('Window exterior coverage failed');
+  if(coverage.upperCoverageMisses.length||coverage.exteriorCoverageMisses.length||coverage.clothMisses.length)errors.push('Window or bedding coverage failed');
   await page.click('[data-design="1"]');
   const original=await page.evaluate(()=>{const r=roomStudy;let lightmaps=0;r.scene.traverseVisible(o=>{if(o.material?.lightMap)lightmaps++;});return {active:r.activeDesign,environment:r.scene.environment,lightmaps};});
   await page.click('[data-design="4"]');

@@ -19,6 +19,12 @@ Files:
 - `quality.js`: asset loading and day/night/before material switching.
 - `glass.js`: cached room capture and PMREM filtering for material reflections.
 
+Bedding uses larger white back pillows, square cream/slate houndstooth cushions,
+and a smaller slate lumbar pillow. Blender relaxes pressure-filled cloth shells
+against their sewn perimeter, with soft top dents and edge gathers. The wider
+duvet wraps beyond the mattress foot and sides, with a 5mm rounded-box clearance
+applied after subdivision and cloth thickness. The throw follows the same drape.
+
 Rebuild from the project root on this Windows machine (Blender 5.2 installed):
 
 ```powershell
@@ -60,6 +66,13 @@ rerunning `refine-softgoods.py`, then export the room and rebuild its bakes.
 Light placement, room geometry, and furniture movement require a new bake.
 Changing camera position does not. Light maps contain diffuse light; moving
 reflections are computed in the browser from a filtered room cubemap.
+
+For cloth edits that retain mesh order and triangle counts, export the updated
+room and run `tools/bake-cloth-lighting.py` in Blender. It verifies the layout
+against the existing manifest, then refreshes the two cloth vertex-GI buffers
+with 512 samples and the original lights/bounce settings. The existing room
+atlas and UV packing remain intact. The quality check includes pillow/duvet
+close-ups and 150 rays testing mattress occlusion from above, the foot and sides.
 
 The Blender scripts create technical mesh/light-map assets, not architectural
 still images. Browser screenshots and intermediate baking files stay in the

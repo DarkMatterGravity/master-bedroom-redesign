@@ -3,7 +3,7 @@ import { GLTFLoader } from './vendor/addons/loaders/GLTFLoader.js';
 import { HDRLoader } from './vendor/addons/loaders/HDRLoader.js';
 
 export async function installRefinedSoftgoods(inspired){
-  const asset=await new GLTFLoader().loadAsync('./Assets/softgoods.glb');
+  const asset=await new GLTFLoader().loadAsync('./Assets/softgoods.glb?v=20261103-bedding');
   inspired.group.traverse(object=>{if(object.userData.softgoods)object.visible=false;});
   asset.scene.name='blender-refined-softgoods';
   asset.scene.traverse(object=>{
@@ -18,7 +18,7 @@ export async function installRefinedSoftgoods(inspired){
   inspired.group.add(asset.scene);return asset.scene;
 }
 
-const lightingAsset=path=>`${path}?v=20261103-coverage`;
+const lightingAsset=path=>`${path}?v=20261103-bedding`;
 
 export async function installBakedLighting(scene){
   const [manifest,buffer,clothDay,clothNight]=await Promise.all([
