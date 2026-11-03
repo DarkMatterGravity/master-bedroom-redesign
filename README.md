@@ -2,10 +2,11 @@
 
 [Open the latest design online](https://darkmattergravity.github.io/master-bedroom-redesign/?design=4).
 The hosted viewer runs directly in a browser; no installation is needed.
-Daytime windows show the actual neighborhood and water view, projected onto
-a curved exterior band from two photos and nine calibrated video frames.
-Night mode uses a matching curved panorama from nine frames of the actual
-nighttime sweep, with the front-window plantation shutters open.
+Daytime windows show one stitched panorama of the actual neighborhood and
+water view, using the new continuous daytime sweep and the sharper water photo.
+Original house/water camera directions anchor the wider coverage. Night mode uses its
+own stitched panorama from the actual nighttime sweep. Both textures wrap
+around the room with the front-window plantation shutters open.
 The upper window shows blue sky and treetops by day and the matching dark
 canopy at night, cropped from the actual video captures.
 

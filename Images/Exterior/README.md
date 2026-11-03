@@ -9,24 +9,32 @@ The original movie and unused source photos remain local.
 rotation estimated from SIFT feature matches and refined with OpenCV's
 rotation bundle adjustment. Intrinsics are in each source image's pixels.
 
-`exterior.js` projects these overlapping photographs onto a 24-meter-radius
-cylinder outside the room. The water photograph faces the paired north
-windows; the front photograph faces west. Feathered edges blend the patches,
-and the higher resolution stills overlay the video coverage. The photographed
-front sill/jamb is omitted using UV bounds. These are photographic backdrops,
-not a reconstruction of the outdoor buildings: movement has approximate
-parallax, and nearby objects can show minor capture alignment differences.
+`tools/stitch-exterior.py` builds `panorama-day.jpg` and `panorama-night.jpg`.
+The day image uses the distant water still and the new continuous sweep from
+IMG_7590.MOV (63 sampled frames for registration). Unit-ray feature matching,
+RANSAC and joint rotation averaging
+register the new footage against fixed original house/water camera anchors.
+The 32 most distinct new viewing directions provide the final coverage.
+Earlier front-facing photos anchor camera directions but are not overlaid on
+the new nearby trees: their different capture position causes parallax seams.
+Source pixels are inverse-warped into one equirectangular image; projections
+behind cameras or outside their photographs are rejected. Graph-cut seams
+prefer agreeing image regions and protect the house/water centers. Multiband blending
+smooths exposure transitions. Clear-blue sky uses a common elevation profile
+sampled from the original water photo to remove phone exposure changes.
 
-The band is visible by day. Night switches to the matching calibrated video
-patches in `Night/`; the front-window plantation shutters stay open.
+`exterior.js` displays one spherical mesh per mode at a 24-meter radius. The
+water photograph faces the paired north windows; the front photograph faces
+west. There are no overlapping runtime photo panels or clamped edge samples.
+Night uses its own stitched texture from the calibrated frames in `Night/`.
+The front-window plantation shutters stay open.
 
-`Extra/` contains 20 additional frames from IMG_7590.MOV. Their rotations in
-`extra-cameras.json` are registered against the original fixed cameras using
-`tools/extend-exterior.py`. They extend the sky, ground and side coverage
-without changing the approved window alignment. They render behind the
-original photographs and use half-resolution textures on phones.
+Run `python tools/stitch-exterior.py` from the project root with OpenCV/NumPy
+installed and IMG_7590.MOV available in Downloads. Extracted frames, camera
+registration cache and coverage masks stay under ignored `previews/`.
 
-A complete cylindrical photographic back layer fills directions beyond the
-captured frames in both modes. It uses clamped samples from the corresponding
-front/water photos; at extreme angles this can stretch edge details. The upper
-window has its own enlarged, sky-cropped backdrop to avoid bare gray edges.
+These are photographic surroundings, not reconstructed buildings. Nearby
+fences/branches can retain small parallax differences between captures. Areas
+never photographed use a soft color continuation, with clear sky above the
+horizon; coverage masks record which pixels came from the actual captures.
+The upper window retains its separate sky-cropped backdrop.
