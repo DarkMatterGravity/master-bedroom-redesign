@@ -12,6 +12,6 @@ camera by a 0.075 vertical slope correction. It is a photographic approximation;
 low-light motion blur, glass reflections and small foreground alignment
 differences remain from the original footage.
 
-The upper window uses only upper-central sky from frame 4. Closed plantation
-shutters continue to cover the front window at night. Daytime assets and their
+The upper window uses only upper-central sky from frame 4. Plantation
+shutters stay open to reveal the front view at night. Daytime assets and their
 calibration are independent of this night capture.

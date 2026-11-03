@@ -18,4 +18,4 @@ not a reconstruction of the outdoor buildings: movement has approximate
 parallax, and nearby objects can show minor capture alignment differences.
 
 The band is visible by day. Night switches to the matching calibrated video
-patches in `Night/`; the front-window plantation shutters remain closed.
+patches in `Night/`; the front-window plantation shutters stay open.

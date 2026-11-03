@@ -33,7 +33,7 @@ const fs = require('node:fs');
   if(!night.black||!night.hidden)errors.push('Night exterior is not black/hidden');
   const nightBand=await page.evaluate(()=>{const exterior=roomStudy.scene.getObjectByName('night-exterior');return {visible:exterior.visible,patches:exterior.children.length,loaded:exterior.children.every(p=>!!p.material.uniforms.photograph.value.image)};});
   if(!nightBand.visible||nightBand.patches!==9||!nightBand.loaded)errors.push('Night video exterior failed: '+JSON.stringify(nightBand));
-  if(!await page.evaluate(()=>roomStudy.scene.getObjectByName('closed-west-plantation-shutters').visible))errors.push('Night shutters did not close');
+  if(await page.evaluate(()=>roomStudy.scene.getObjectByName('closed-west-plantation-shutters').visible))errors.push('Front window shutters should stay open at night');
   await page.evaluate(()=>roomStudy.setView('bed'));
   await page.screenshot({path:'previews/night.png'});
   await page.click('#day-night');

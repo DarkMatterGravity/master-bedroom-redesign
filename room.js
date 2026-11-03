@@ -283,8 +283,8 @@ function lighting(evening){
   windowLights.forEach((l,i)=>l.intensity=evening||(i===2&&activeDesign===1)?0:14);
   windowGlazing.forEach(mat=>{mat.opacity=evening?.045:.035;mat.color.set(evening?'#b2c3d0':'#e2eef3');});
   windowGlows.forEach(mat=>mat.opacity=evening?0:.025);
-  closedWestShutters.visible=evening;
-  shutters.forEach(group=>group.visible=activeDesign===1&&!(evening&&group.userData.westWindow));
+  closedWestShutters.visible=false;
+  shutters.forEach(group=>group.visible=activeDesign===1);
   fanLight.intensity=activeDesign===1?(evening?14:5):0;
   lamps.forEach(l=>l.intensity=activeDesign===1?(evening?4:1.2):0);
   inspired.setLighting(evening);
