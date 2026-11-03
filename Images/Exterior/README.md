@@ -10,18 +10,30 @@ rotation estimated from SIFT feature matches and refined with OpenCV's
 rotation bundle adjustment. Intrinsics are in each source image's pixels.
 
 `tools/stitch-exterior.py` builds `panorama-day.jpg` and `panorama-night.jpg`.
-The day image uses the distant water still and the new continuous sweep from
-IMG_7590.MOV (63 sampled frames for registration). Unit-ray feature matching,
-RANSAC and joint rotation averaging
-register the new footage against fixed original house/water camera anchors.
-The 32 most distinct new viewing directions provide the final coverage.
-Earlier front-facing photos anchor camera directions but are not overlaid on
-the new nearby trees: their different capture position causes parallax seams.
+The original photos/video retain their captured regions, including the porch
+roof in `front.jpg`. Added footage from IMG_7590.MOV extends their coverage
+instead of replacing objects already visible in those photographs. The new
+video uses a separately measured 1095px focal length, rather than the earlier
+video's approximately 879px value. Estimates from 63 within-video homographies
+had a median of 1095px (middle half 1058–1128px).
+
+Unit-ray RANSAC matches first build one coherent new sweep. Original cameras
+then anchor its global orientation; near-singular homographies are rejected.
+The 32 most distinct new directions provide additional coverage. The brown
+house extension uses facade-plane alignment to its original window landmarks
+and a shared exposure correction. This confines the extension to the building;
+foreground fencing retains the camera projection rather than the facade plane.
 Source pixels are inverse-warped into one equirectangular image; projections
 behind cameras or outside their photographs are rejected. Graph-cut seams
 prefer agreeing image regions and protect the house/water centers. Multiband blending
 smooths exposure transitions. Clear-blue sky uses a common elevation profile
-sampled from the original water photo to remove phone exposure changes.
+sampled from the original water photo to remove phone exposure changes. Sky
+correction uses a connected sky/foreground mask so pale branches and white
+facades remain intact; it has no hard elevation cutoff across the window view.
+
+`tools/verify-quality.cjs` captures dedicated porch-roof, street-car, brown-house
+and near-fence views in both modes. Inspect those images in `previews/` when
+changing the stitch; geometric coverage tests alone cannot detect cut objects.
 
 `exterior.js` displays one spherical mesh per mode at a 24-meter radius. The
 water photograph faces the paired north windows; the front photograph faces

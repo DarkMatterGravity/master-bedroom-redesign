@@ -18,7 +18,7 @@ let browser;
   if(finish.wallColor!=='eeeae4'||finish.wallRoughness!==.42||finish.mouldingRoughness!==.6||finish.trimRoughness!==.6)errors.push('Soft-white satin/eggshell finishes failed');
   for(const mode of ['day','night']){
     if(mode==='night')await page.click('#day-night');
-    for(const [name,position,target] of [['gable',[87,65,109],[0,105,130]],['door',[100,64,92],[146,68,120]],['corner',[90,70,125],[124,133,170]],['base',[26,44,65],[0,15,42]],['upper-trim',[65,108,142],[0,140,163]]]){
+    for(const [name,position,target] of [['gable',[87,65,109],[0,105,130]],['door',[100,64,92],[146,68,120]],['corner',[90,70,125],[124,133,170]],['base',[26,44,65],[0,15,42]],['upper-trim',[65,108,142],[0,140,163]],['porch-roof',[25,64,42],[0,32,42]],['street-car',[20,64,40],[0,48,56]],['brown-house',[75,64,25],[91,41,0]],['near-fence',[62,64,15],[62,30,0]]]){
       await page.evaluate(({position,target})=>{const r=roomStudy;r.camera.position.set(...position.map(n=>n*.0254));r.camera.lookAt(...target.map(n=>n*.0254));r.camera.fov=60;r.camera.updateProjectionMatrix();},{position,target});
       await page.screenshot({path:`previews/smooth-${mode}-${name}.png`});
     }

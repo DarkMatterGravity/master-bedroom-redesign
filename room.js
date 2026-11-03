@@ -5,7 +5,7 @@ import { createWindowReflections } from './glass.js?v=20261103-quality';
 import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js?v=20261103-quality';
 import { createAntiqueFurniture } from './antique-furniture.js';
 import { miteredRail, miteredFrameBand } from './joinery.js';
-import { createPhotoExterior } from './exterior.js?v=20261103-stitched';
+import { createPhotoExterior } from './exterior.js?v=20261103-anchored';
 import { installRefinedSoftgoods, installBakedLighting } from './quality.js?v=20261103-coverage';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.
