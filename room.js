@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three.module.js';
 import { createInspiredDesign } from './designs.js?v=20261102-darker-curtains';
-import { createVaultedCeiling } from './vaulted.js?v=20261102-night-panorama';
+import { createVaultedCeiling } from './vaulted.js?v=20261102-upper-canopy';
 import { createWindowReflections } from './glass.js?v=20261102-finishes';
 import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js';
 import { createAntiqueFurniture } from './antique-furniture.js';

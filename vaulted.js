@@ -74,21 +74,26 @@ export function createVaultedCeiling({scene,INCH,box,rod,cylinder,m,paint,trim,g
   const recess=m('#c8c4b7',.6);
   for(const x of [wx-13.45,wx+13.45])box(1.1,28,4,x,wy,-1.6,recess,highWindow);
   for(const y of [bottom+.55,top-.55])box(28,1.1,4,wx,y,-1.6,recess,highWindow);
-  const highGlass=new THREE.MeshBasicMaterial({color:'#fffbed',transparent:true,opacity:.97,depthWrite:false,toneMapped:false});
+  const highGlass=new THREE.MeshBasicMaterial({color:'#e2eef3',transparent:true,opacity:.035,depthWrite:false,toneMapped:false});
   const pane=box(25.8,25.8,.12,wx,wy,-1,highGlass,highWindow);pane.name='gable-window-glass';pane.castShadow=false;
   reflections.addPane(highWindow,25.8,25.8,wx,wy,-.85);
-  // Upper-central sky from the matching nighttime sweep, without city/trees.
-  const skyTexture=new THREE.TextureLoader().load('./Images/Exterior/Night/view-04.jpg',texture=>{
-    const skyWidth=.34,skyHeight=skyWidth*texture.image.width/texture.image.height;
-    texture.repeat.set(skyWidth,skyHeight);texture.offset.set(.32,.99-skyHeight);
-  });skyTexture.colorSpace=THREE.SRGBColorSpace;skyTexture.anisotropy=8;
-  const nightSky=new THREE.Mesh(new THREE.PlaneGeometry(28*INCH,28*INCH),new THREE.MeshBasicMaterial({map:skyTexture,toneMapped:false}));
-  nightSky.name='upper-window-night-sky';nightSky.position.set(wx*INCH,wy*INCH,-2.3*INCH);nightSky.visible=false;highWindow.add(nightSky);
+  // Look higher into the actual front-facing captures: sky and leafy canopy,
+  // with houses and street cropped away. Place the view beyond the glazing.
+  function canopyView(path,offsetX,name){
+    const texture=new THREE.TextureLoader().load(path,tex=>{
+      const width=.62,height=width*tex.image.width/tex.image.height;
+      tex.repeat.set(width,height);tex.offset.set(offsetX,1-height);
+    });texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=8;
+    const view=new THREE.Mesh(new THREE.PlaneGeometry(44*INCH,44*INCH),new THREE.MeshBasicMaterial({map:texture,toneMapped:false}));
+    view.name=name;view.position.set(wx*INCH,wy*INCH,-18*INCH);highWindow.add(view);return view;
+  }
+  const daySky=canopyView('./Images/Exterior/view-00.jpg',0,'upper-window-day-sky');
+  const nightSky=canopyView('./Images/Exterior/Night/view-00.jpg',.32,'upper-window-night-sky');nightSky.visible=false;
   miteredFrameBand(35,35,3.5,1.2,wx,wy,.7,trim,highWindow);
   const highGlowMat=new THREE.MeshBasicMaterial({map:glowTexture,transparent:true,opacity:.18,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false});
   const highGlow=new THREE.Mesh(new THREE.PlaneGeometry(46*INCH,48*INCH),highGlowMat);highGlow.position.set(wx*INCH,wy*INCH,2.3*INCH);highGlow.renderOrder=2;highWindow.add(highGlow);
   const highFill=new THREE.PointLight('#e2f0ff',6,4,2);highFill.position.set(5*INCH,wy*INCH,163*INCH);group.add(highFill);
 
   return {group,boards,flatCap,bedWall,gableWall,highWindow,height,peak,ridgeZ,pitchDegrees:30,rearPitchDegrees:30,
-    setLighting(night){nightSky.visible=night;highGlass.color.set(night?'#b2c3d0':'#fffbed');highGlass.opacity=night?.045:.97;highGlowMat.opacity=night?0:.18;highFill.intensity=night?0:6;}};
+    setLighting(night){daySky.visible=!night;nightSky.visible=night;highGlass.color.set(night?'#b2c3d0':'#e2eef3');highGlass.opacity=night?.045:.035;highGlowMat.opacity=night?0:.025;highFill.intensity=night?0:6;}};
 }

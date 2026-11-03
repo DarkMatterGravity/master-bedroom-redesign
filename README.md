@@ -6,6 +6,8 @@ Daytime windows show the actual neighborhood and water view, projected onto
 a curved exterior band from two photos and nine calibrated video frames.
 Night mode uses a matching curved panorama from nine frames of the actual
 nighttime sweep, with the front-window plantation shutters open.
+The upper window shows blue sky and treetops by day and the matching dark
+canopy at night, cropped from the actual video captures.
 
 To run locally, double-click **Start-Room.cmd** on Windows, or run `python serve.py` in this folder.
 The server opens http://127.0.0.1:8000 in your browser. Keep its terminal window open.
