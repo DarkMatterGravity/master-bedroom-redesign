@@ -31,6 +31,7 @@ python tools/check-lightmap-seams.py
 python tools/smooth-lightmaps.py
 python tools/encode-lightmaps.py
 python tools/stitch-wall-lighting.py
+python tools/soften-painted-edges.py
 node tools/verify-quality.cjs
 node verify.cjs
 ```
@@ -47,6 +48,9 @@ therefore share continuous UV charts instead of a separate island per triangle.
 The seam check tests 679 shared edges on the current model. Denoising and
 residual-noise filtering stay inside each chart; world-space wall filtering
 joins lighting across the separate eight-foot walls and vaulted extensions.
+Corner filtering limits exaggerated dark bands at the hallway return, and
+painted-edge filtering softens dark moulding side faces and rebuilds atlas
+gutters. Door inset outlines share the white eggshell trim finish.
 The room's painted walls/panel faces are soft white (`#eeeae4`) with a satin
 roughness of 0.42. Mouldings use an eggshell roughness of 0.6. Before retains
 its original palette and finish settings.

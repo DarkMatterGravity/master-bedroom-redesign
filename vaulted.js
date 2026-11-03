@@ -80,12 +80,22 @@ export function createVaultedCeiling({scene,INCH,box,rod,cylinder,m,paint,trim,g
   // Look higher into the actual front-facing captures: sky and leafy canopy,
   // with houses and street cropped away. Place the view beyond the glazing.
   function canopyView(path,offsetX,name){
+    const width=.62,height=width*720/1280;
     const texture=new THREE.TextureLoader().load(path,tex=>{
-      const width=.62,height=width*tex.image.width/tex.image.height;
       tex.repeat.set(width,height);tex.offset.set(offsetX,1-height);
     });texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=8;
-    const view=new THREE.Mesh(new THREE.PlaneGeometry(44*INCH,44*INCH),new THREE.MeshBasicMaterial({map:texture,toneMapped:false}));
-    view.name=name;view.position.set(wx*INCH,wy*INCH,-18*INCH);highWindow.add(view);return view;
+    const geometry=new THREE.PlaneGeometry(160*INCH,160*INCH),uv=geometry.attributes.uv;
+    for(let i=0;i<uv.count;i++)uv.setXY(i,(uv.getX(i)-.5)*160/44+.5,(uv.getY(i)-.5)*160/44+.5);
+    const material=new THREE.MeshBasicMaterial({map:texture,toneMapped:false});
+    material.onBeforeCompile=shader=>{
+      shader.uniforms.canopyCrop={value:new THREE.Vector4(offsetX,1-height,offsetX+width,1)};
+      shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nuniform vec4 canopyCrop;').replace('#include <map_fragment>','#ifdef USE_MAP\ndiffuseColor*=texture2D(map,clamp(vMapUv,canopyCrop.xy,canopyCrop.zw));\n#endif');
+    };
+    material.customProgramCacheKey=()=> 'upper-canopy-edge-clamp-v2';
+    // Cover oblique views from the navigable room while keeping the card clear
+    // of the lower front window. Clamp to the sky-only crop at its outer edges.
+    const view=new THREE.Mesh(geometry,material);
+    view.name=name;view.position.set(wx*INCH,wy*INCH,-2.3*INCH);highWindow.add(view);return view;
   }
   const daySky=canopyView('./Images/Exterior/view-00.jpg',0,'upper-window-day-sky');
   const nightSky=canopyView('./Images/Exterior/Night/view-00.jpg',.32,'upper-window-night-sky');nightSky.visible=false;

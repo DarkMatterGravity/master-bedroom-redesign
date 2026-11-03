@@ -1,4 +1,5 @@
 import * as THREE from './vendor/three.module.js';
+import { createExteriorCoverage } from './exterior-coverage.js';
 
 // Calibrated photo patches share a distant cylinder rather than following the
 // camera or being pasted onto individual panes. Walls naturally mask the band.
@@ -8,14 +9,18 @@ export async function createPhotoExterior(scene,{night=false}={}){
   if(!response.ok)throw new Error('Could not load exterior camera calibration');
   const cameras=await response.json(),loader=new THREE.TextureLoader();
   const group=new THREE.Group();group.name=night?'night-exterior':'exterior';group.visible=!night;scene.add(group);
+  const extra=night?[]:await fetch('./Images/Exterior/extra-cameras.json').then(r=>{if(!r.ok)throw new Error('Exterior extension calibration missing');return r.json();});
   const radius=24,origin=new THREE.Vector3(62*.0254,60*.0254,75*.0254);
   const water=night?cameras[5]:cameras.find(c=>c.image==='water.jpg'),front=night?cameras[0]:cameras.find(c=>c.image==='front.jpg');
   const heading=c=>Math.atan2(c.rotation[0][2],c.rotation[2][2]);
   const north=heading(water),yawScale=(Math.PI/2)/(north-heading(front));
-  await Promise.all(cameras.map(async(camera,index)=>{
+  const textures=new Map(),allCameras=[...extra,...cameras];
+  await Promise.all(allCameras.map(async(camera,index)=>{
     const texture=await loader.loadAsync(`${base}/${camera.image}`);
     texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=8;
-    const geometry=new THREE.PlaneGeometry(1,1,48,64);
+    if(camera.extension&&innerWidth<=700){const canvas=document.createElement('canvas');canvas.width=360;canvas.height=640;canvas.getContext('2d').drawImage(texture.image,0,0,360,640);texture.image=canvas;texture.needsUpdate=true;}
+    textures.set(camera.image,texture);
+    const geometry=new THREE.PlaneGeometry(1,1,camera.extension?24:48,camera.extension?32:64);
     const position=geometry.attributes.position,uv=geometry.attributes.uv;
     geometry.setAttribute('blendUv',uv.clone());
     const r=camera.rotation,isFront=camera.image==='front.jpg';
@@ -44,8 +49,9 @@ export async function createPhotoExterior(scene,{night=false}={}){
         }`
     });
     const patch=new THREE.Mesh(geometry,material);patch.name=`exterior-photo-${camera.image}`;
-    patch.renderOrder=-20+index;group.add(patch);
+    patch.renderOrder=camera.extension?-60+index:-20+(index-extra.length);group.add(patch);
   }));
-  group.userData={type:'calibrated-cylindrical-photo-band',radiusMeters:radius,videoFrames:9,photographs:night?0:2,frontDirection:'west',waterDirection:'north',night};
+  group.add(createExteriorCoverage({front,water,frontTexture:textures.get(front.image),waterTexture:textures.get(water.image),north,yawScale,night,origin}));
+  group.userData={type:'calibrated-cylindrical-photo-band',radiusMeters:radius,videoFrames:9,additionalFrames:extra.length,continuousCoverage:true,photographs:night?0:2,frontDirection:'west',waterDirection:'north',night};
   return group;
 }

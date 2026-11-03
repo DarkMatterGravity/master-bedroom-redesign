@@ -48,6 +48,21 @@ for mode in ['day','night']:
         _,nearest=cv2.distanceTransformWithLabels((~valid).astype(np.uint8),cv2.DIST_L2,5,labelType=cv2.DIST_LABEL_PIXEL);locations=np.argwhere(valid)
         field=field[locations[nearest-1,0],locations[nearest-1,1]]
         sigma=(.07 if mode=='night' else .025)/CELL;field=cv2.GaussianBlur(field,(0,0),sigmaX=sigma,sigmaY=sigma)
+        # The concave hallway corner was reading as a dark vertical beam.
+        # Bound its contact contrast against the same wall just beyond the
+        # corner; retain a small, smoothly fading occlusion at the actual join.
+        corner_axis=None
+        if key[0]==0 and key[1]==-1 and abs(key[2]-124*.0254)<.002:corner_axis=1;corner_value=120*.0254
+        if key[0]==2 and key[1]==-1 and abs(key[2]-120*.0254)<.002:corner_axis=0;corner_value=124*.0254
+        if corner_axis is not None:
+            distance=world[:,corner_axis]-corner_value;near=(distance>=-.005)&(distance<.23)
+            if near.any():
+                reference=grid.copy();reference[:,corner_axis]=(corner_value+.25-origin[corner_axis])/CELL
+                ref=cv2.remap(field,reference[:,0].astype(np.float32).reshape(-1,1),reference[:,1].astype(np.float32).reshape(-1,1),cv2.INTER_LINEAR).reshape(-1,3)
+                sampled=cv2.remap(field,grid[:,0].astype(np.float32).reshape(-1,1),grid[:,1].astype(np.float32).reshape(-1,1),cv2.INTER_LINEAR).reshape(-1,3)
+                strength=np.exp(-(distance[near]/.14)**2)[:,None];floor=ref[near]*(.86 if mode=='day' else .72)
+                lifted=np.maximum(sampled[near],floor);sampled[near]=sampled[near]*(1-strength)+lifted*strength
+                output[yy,xx]=sampled;continue
         sampled=cv2.remap(field,grid[:,0].astype(np.float32).reshape(-1,1),grid[:,1].astype(np.float32).reshape(-1,1),cv2.INTER_LINEAR).reshape(-1,3)
         output[yy,xx]=sampled
     for suffix,size in [('',2048),('-mobile',1024)]:

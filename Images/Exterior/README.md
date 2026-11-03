@@ -19,3 +19,14 @@ parallax, and nearby objects can show minor capture alignment differences.
 
 The band is visible by day. Night switches to the matching calibrated video
 patches in `Night/`; the front-window plantation shutters stay open.
+
+`Extra/` contains 20 additional frames from IMG_7590.MOV. Their rotations in
+`extra-cameras.json` are registered against the original fixed cameras using
+`tools/extend-exterior.py`. They extend the sky, ground and side coverage
+without changing the approved window alignment. They render behind the
+original photographs and use half-resolution textures on phones.
+
+A complete cylindrical photographic back layer fills directions beyond the
+captured frames in both modes. It uses clamped samples from the corresponding
+front/water photos; at extreme angles this can stretch edge details. The upper
+window has its own enlarged, sky-cropped backdrop to avoid bare gray edges.

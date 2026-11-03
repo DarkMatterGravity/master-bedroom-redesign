@@ -1,12 +1,12 @@
 import * as THREE from './vendor/three.module.js';
 import { createInspiredDesign } from './designs.js?v=20261103-smooth-light';
-import { createVaultedCeiling } from './vaulted.js?v=20261103-quality';
+import { createVaultedCeiling } from './vaulted.js?v=20261103-coverage';
 import { createWindowReflections } from './glass.js?v=20261103-quality';
 import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js?v=20261103-quality';
 import { createAntiqueFurniture } from './antique-furniture.js';
 import { miteredRail, miteredFrameBand } from './joinery.js';
-import { createPhotoExterior } from './exterior.js?v=20261102-night-panorama';
-import { installRefinedSoftgoods, installBakedLighting } from './quality.js?v=20261103-smooth-light';
+import { createPhotoExterior } from './exterior.js?v=20261103-coverage';
+import { installRefinedSoftgoods, installBakedLighting } from './quality.js?v=20261103-coverage';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.
 const INCH = 0.0254;
@@ -156,7 +156,8 @@ box(45,.4,67,146.5,-.2,153.5,oakMats[1]);box(4,96,67,171,48,153.5,m('#d3c7a8'));
 box(45,96,4,146.5,48,189,m('#d3c7a8'));box(41,2,63,148.5,97,155.5,ceilingMat);
 box(38,.5,56,190,-.2,37,oakMats[0]);box(4,96,56,210,48,37,ivory);box(38,96,4,190,48,7,ivory);box(38,96,4,190,48,66,ivory);box(38,2,56,190,97,37,ceilingMat);
 for(const y of [18,36,54,72])box(28,1,10,191,y,60,trim);
-function door(width,x,z,rotation,angle){const hinge=new THREE.Group();hinge.position.set(x*INCH,0,z*INCH);hinge.rotation.y=rotation+angle;scene.add(hinge);box(width,80,1.4,width/2,40,0,trim,hinge);const inset=m('#d9dbd0',.55);
+const doorInsets=[];
+function door(width,x,z,rotation,angle){const hinge=new THREE.Group();hinge.position.set(x*INCH,0,z*INCH);hinge.rotation.y=rotation+angle;scene.add(hinge);box(width,80,1.4,width/2,40,0,trim,hinge);const inset=m('#d9dbd0',.55);doorInsets.push(inset);
   for(const dx of [width*.26,width*.74])for(const [y,h] of [[14,20],[41,27],[67,15]]){
     box(width*.36,h,.18,dx,y,.76,inset,hinge);box(width*.36-1,h-1,.15,dx,y,.9,trim,hinge);
     box(width*.36,h,.18,dx,y,-.76,inset,hinge);box(width*.36-1,h-1,.15,dx,y,-.9,trim,hinge);
@@ -328,6 +329,7 @@ function setDesign(number){
   paint.roughnessMap=redesign?inspired.plasterMaps.roughnessMap:null;
   paint.normalScale.set(.16,.16);paint.needsUpdate=true;
   trim.color.set(redesign?'#f0ede7':'#efeee3');trim.roughness=redesign?.6:.5;ceilingMat.color.set(redesign?'#f0ebe0':'#f3f0e5');
+  for(const inset of doorInsets){inset.color.set(redesign?'#f0ede7':'#d9dbd0');inset.roughness=redesign?.6:.55;}
   oakMats.forEach((mat,i)=>{
     mat.map=redesign?inspired.floorFinish.map:floorOriginals[i].map;
     mat.normalMap=redesign?inspired.floorFinish.normalMap:null;

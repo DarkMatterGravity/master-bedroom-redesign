@@ -18,7 +18,7 @@ export async function installRefinedSoftgoods(inspired){
   inspired.group.add(asset.scene);return asset.scene;
 }
 
-const lightingAsset=path=>`${path}?v=20261103-smooth-light`;
+const lightingAsset=path=>`${path}?v=20261103-coverage`;
 
 export async function installBakedLighting(scene){
   const [manifest,buffer,clothDay,clothNight]=await Promise.all([
@@ -32,7 +32,7 @@ export async function installBakedLighting(scene){
   await Promise.all(['day','night'].map(async mode=>{
     const image=mobile?manifest.modes[mode].mobileImage:manifest.modes[mode].image;
     const texture=await loader.loadAsync(lightingAsset(`./Textures/Lighting/${image}`));
-    texture.channel=1;texture.anisotropy=4;textures[mode]=texture;
+    texture.channel=1;texture.anisotropy=1;textures[mode]=texture;
   }));
   const entries=[],uvs=new Float32Array(buffer),cloth={day:new Uint16Array(clothDay),night:new Uint16Array(clothNight)};
   for(const record of manifest.records){

@@ -24,6 +24,30 @@ let browser;
     }
   }
   await page.click('#day-night');
+  const coverage=await page.evaluate(async()=>{
+    const T=await import('./vendor/three.module.js'),r=roomStudy,misses=[];
+    for(const night of [false,true]){
+      r.lighting(night);
+      r.scene.updateMatrixWorld(true);const sky=r.vaulted.highWindow.getObjectByName(night?'upper-window-night-sky':'upper-window-day-sky');
+      for(const position of [[7,64,7],[7,64,180],[118,64,175]])for(const dz of [-8,0,8])for(const dy of [-8,0,8]){
+        const origin=new T.Vector3(...position.map(v=>v*.0254)),target=new T.Vector3(0,(r.vaulted.peak-50+dy)*.0254,(163+dz)*.0254);
+        const ray=new T.Raycaster(origin,target.sub(origin).normalize());
+        const hit=ray.intersectObject(sky,false)[0];
+        if(hit?.object.name!==(night?'upper-window-night-sky':'upper-window-day-sky'))misses.push({night,position,dz,dy,hit:hit?.object.name});
+      }
+    }
+    const exteriorMisses=[];
+    for(const night of [false,true]){
+      r.lighting(night);const exterior=r.scene.getObjectByName(night?'night-exterior':'exterior'),back=exterior.getObjectByName('continuous-exterior-coverage');
+      for(const position of [[7,64,7],[7,64,115],[118,64,7],[118,64,115]])for(const target of [[30,30,0],[54,80,0],[65,30,0],[92,80,0],[0,30,29],[0,80,55]]){
+        const camera=new T.Vector3(...position.map(v=>v*.0254)),window=new T.Vector3(...target.map(v=>v*.0254)),direction=window.clone().sub(camera).normalize();
+        const ray=new T.Raycaster(window.addScaledVector(direction,.002),direction);
+        if(!ray.intersectObject(back,false).length)exteriorMisses.push({night,position,target});
+      }
+    }
+    r.lighting(false);return {upperCoverageMisses:misses,exteriorCoverageMisses:exteriorMisses};
+  });
+  if(coverage.upperCoverageMisses.length||coverage.exteriorCoverageMisses.length)errors.push('Window exterior coverage failed');
   await page.click('[data-design="1"]');
   const original=await page.evaluate(()=>{const r=roomStudy;let lightmaps=0;r.scene.traverseVisible(o=>{if(o.material?.lightMap)lightmaps++;});return {active:r.activeDesign,environment:r.scene.environment,lightmaps};});
   await page.click('[data-design="4"]');
@@ -33,6 +57,6 @@ let browser;
   await mobile.goto(process.env.ROOM_URL||'http://127.0.0.1:8000/?design=4');await mobile.waitForFunction(()=>!!window.roomStudy,null,{timeout:120000});
   const mobileFacts=await mobile.evaluate(()=>{const r=roomStudy;let atlas=0;r.scene.traverseVisible(o=>{if(o.material?.lightMap)atlas=o.material.lightMap.image.width;});return {atlas,overflow:document.documentElement.scrollWidth>innerWidth,triangles:r.renderer.info.render.triangles};});
   await mobile.screenshot({path:'previews/quality-mobile.png'});if(mobileFacts.atlas!==1024||mobileFacts.overflow)errors.push('Mobile quality tier failed');
-  const result={loadMs,facts,finish,original,mobileFacts,errors};fs.writeFileSync('previews/quality-check.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+  const result={loadMs,facts,finish,...coverage,original,mobileFacts,errors};fs.writeFileSync('previews/quality-check.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
   await browser.close();if(errors.length)process.exitCode=1;
 })().catch(async e=>{console.error(e);await browser?.close();process.exitCode=1;});
