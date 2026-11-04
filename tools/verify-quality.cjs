@@ -8,7 +8,7 @@ let browser;
   const start=Date.now();await page.goto(process.env.ROOM_URL||'http://127.0.0.1:8000/?design=4');await page.waitForFunction(()=>!!window.roomStudy,null,{timeout:120000});
   const loadMs=Date.now()-start;
   const seating=await page.evaluate(()=>{const r=roomStudy,meshes=[];r.windowSeating.traverse(o=>{if(o.isMesh&&o.userData.seatingRole)meshes.push(o);});return {chairs:r.windowSeating.userData.chairs,meshes:meshes.length,lit:meshes.filter(o=>o.geometry.attributes.seatingday&&o.geometry.attributes.seatingnight).length,woodMatches:meshes.filter(o=>o.userData.seatingRole==='wood').every(o=>o.material.map===r.photoMaterials.wood.map),walkway:r.allowed(58*.0254,65*.0254),artLoaded:r.inspired.painting.children.some(o=>o.material?.map?.image?.width>1000)};});
-  if(seating.chairs!==2||seating.meshes!==29||seating.lit!==29||!seating.woodMatches||!seating.walkway||!seating.artLoaded)errors.push('Seating or abstract artwork failed: '+JSON.stringify(seating));
+  if(seating.chairs!==2||seating.meshes!==23||seating.lit!==23||!seating.woodMatches||!seating.walkway||!seating.artLoaded)errors.push('Seating or abstract artwork failed: '+JSON.stringify(seating));
   const facts=await page.evaluate(()=>{const r=roomStudy;let refined=0,baked=0;r.quality.refinedSoftgoods.traverse(o=>{if(o.isMesh)refined++;});r.scene.traverseVisible(o=>{if(o.isMesh&&o.material?.lightMap)baked++;});return {refined,baked,bake:r.quality.bakedLighting,environment:!!r.scene.environment,triangles:r.renderer.info.render.triangles};});
   for(const night of [false,true]){
     await page.evaluate(n=>roomStudy.lighting(n),night);

@@ -90,7 +90,9 @@ by `vendor/LICENSE`.
 `build-window-seating.py` creates the editable barrel-chair pair and matching
 round table in `Assets/window-seating.blend` and exports its GLB. Chair centres
 are X=28/88, Z=29 inches, angled inward 20 degrees; the 18-inch table is centred
-at X=58, Z=32 with a 21.625-inch top. To rebuild the added seating lighting:
+at X=58, Z=32 with a 21.625-inch top, black metal pedestal and 14-inch circular
+metal foot. Each chair has a single upholstered seat rather than stacked pads.
+To rebuild the added seating lighting:
 
 ```powershell
 & 'C:/Program Files/Blender Foundation/Blender 5.2/blender.exe' -b -t 8 --python tools/build-window-seating.py
@@ -99,9 +101,12 @@ node tools/export-room.cjs --include-seating
 ```
 
 This uses the established room lights and five diffuse bounces at 512 samples,
-with smooth normals for the curved upholstery. Only the 29 new meshes receive
+with smooth normals for the curved upholstery (128 samples on the CPU).
+The room remains a lighting backdrop; only the seating is the bake target.
+Only the 23 new meshes receive
 the separate `Textures/Seating` float16 buffers; the existing room atlas stays
 valid. The baker then runs `smooth-seating-lighting.py` to average upholstery
 noise at welded vertices and four neighbouring surface passes. Normal room
 exports omit this extension unless `--include-seating` is
 specified. The large canvas bitmap and prompt are in `Images/Art`.
+Set `ROOM_BAKE_CPU=1` before baking when GPU memory is occupied by other apps.

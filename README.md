@@ -239,7 +239,9 @@ uniform in width. A matching black gallery light casts warm light onto it.
 
 The After room includes two Blender-modeled cognac leather barrel chairs at
 the window corner, angled toward an 18-inch round pedestal table. Their legs
-and table use the same muted wood finish as the bed, chest and dresser.
+and tabletop use the same muted wood finish as the bed, chest and dresser.
+Each chair has one upholstered seat level. The table has a black metal
+pedestal and a low circular metal base.
 Cream/slate houndstooth cushions echo the bed pillows. Editable geometry is in
 `Assets/window-seating.blend`; `seating.js` loads its GLB and separate day/night
 vertex lighting. The route between the seating and chest stays clear.
@@ -247,3 +249,6 @@ vertex lighting. The route between the seating and chest stays clear.
 The bed-wall canvas now uses a dramatic abstract expressionist ocean painting
 in navy, slate, seafoam and ivory. Its asset and generation prompt are saved in
 `Images/Art/`; the existing black frame and gallery light remain in place.
+The tall frame near the windows contains a geographically proportioned detail
+of John Hills's Sandy Hook nautical chart, surveyed in 1782 and published by
+William Faden in 1784. Source and public-domain attribution are in `Images/Art`.

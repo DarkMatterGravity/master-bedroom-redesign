@@ -5,7 +5,7 @@ from mathutils import Vector,Matrix
 ROOT=Path(__file__).resolve().parents[1];I=.0254
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
 materials={}
-for name,color in [('leather',(.32,.13,.045,1)),('seam',(.25,.105,.045,1)),('wood',(.11,.065,.035,1)),('pillow',(.6,.6,.55,1)),('pillow-seam',(.7,.66,.58,1))]:
+for name,color in [('leather',(.32,.13,.045,1)),('seam',(.25,.105,.045,1)),('wood',(.11,.065,.035,1)),('metal',(.015,.015,.015,1)),('pillow',(.6,.6,.55,1)),('pillow-seam',(.7,.66,.58,1))]:
     mat=bpy.data.materials.new(name);mat.diffuse_color=color;materials[name]=mat
 
 def finish(obj,name,role,parent):
@@ -48,7 +48,7 @@ bpy.context.view_layer.objects.active=obj;obj.select_set(True)
 bpy.ops.object.mode_set(mode='EDIT');bpy.ops.mesh.select_all(action='SELECT');bpy.ops.mesh.remove_doubles(threshold=.00001);bpy.ops.mesh.normals_make_consistent(inside=False);bpy.ops.object.mode_set(mode='OBJECT')
 sub=obj.modifiers.new('Cushioned barrel surface','SUBSURF');sub.levels=2;bpy.ops.object.modifier_apply(modifier=sub.name)
 finish(obj,'Wraparound leather back and arms','leather',chair)
-for name,dimensions,center,power in [('Upholstered lower tub',(28.5,28,8),(0,0,10),.65),('Loose leather seat cushion',(24.5,24,4.5),(0,-1.3,16.5),.42)]:
+for name,dimensions,center,power in [('Single upholstered seat',(26.5,26,8.5),(0,-.7,14),.35)]:
     bpy.ops.mesh.primitive_uv_sphere_add(segments=56,ring_count=28,radius=1);obj=bpy.context.object
     for v in obj.data.vertices:
         s=v.co.copy();v.co=Vector([math.copysign(abs(s[k])**(power if k<2 else .6),s[k])*dimensions[k]/2*I+center[k]*I for k in range(3)])
@@ -56,7 +56,7 @@ for name,dimensions,center,power in [('Upholstered lower tub',(28.5,28,8),(0,0,1
     finish(obj,name,'leather',chair)
 points=[]
 for j in range(97):
-    a=j/96*math.tau;x=math.copysign(abs(math.cos(a))**.42,math.cos(a))*12.25;y=math.copysign(abs(math.sin(a))**.42,math.sin(a))*12-1.3;points.append((x,y,16.4))
+    a=j/96*math.tau;x=math.copysign(abs(math.cos(a))**.35,math.cos(a))*13.25;y=math.copysign(abs(math.sin(a))**.35,math.sin(a))*13-.7;points.append((x,y,13.9))
 pipe('Seat cushion welt',points,.035,chair)
 points=[]
 for j in range(89):
@@ -75,7 +75,7 @@ for j in range(97):
 pipe('Cushion sewn edge',points,.03,chair,'pillow-seam')
 for x in [-9,9]:
     for y in [-8.5,8.5]:
-        bpy.ops.mesh.primitive_cone_add(vertices=12,radius1=.85*I,radius2=1.25*I,depth=6.5*I,location=(x*I,y*I,3.25*I));finish(bpy.context.object,'Tapered timber leg','wood',chair)
+        bpy.ops.mesh.primitive_cone_add(vertices=12,radius1=.85*I,radius2=1.25*I,depth=10*I,location=(x*I,y*I,5*I));finish(bpy.context.object,'Tapered timber leg','wood',chair)
 # Convert the two sewn edges; create useful planar upholstery/wood UVs.
 bpy.ops.object.select_all(action='DESELECT')
 for obj in list(chair.children):
@@ -90,11 +90,9 @@ second=bpy.data.objects.new('Chair B',None);bpy.context.collection.objects.link(
 for original in list(chair.children):
     copy=original.copy();copy.data=original.data;copy.parent=second;bpy.context.collection.objects.link(copy)
 table=bpy.data.objects.new('Matching wood side table',None);bpy.context.collection.objects.link(table);table.location=(58*I,-32*I,0)
-for name,radius,depth,z in [('Round timber tabletop',9,1.25,21),('Turned pedestal',1.7,16.5,11.6),('Pedestal collar',3.2,1,3.7)]:
+for name,radius,depth,z,role in [('Round timber tabletop',9,1.25,21,'wood'),('Black metal pedestal',1.15,20,10.5,'metal'),('Circular black metal base',7,.65,.325,'metal')]:
     bpy.ops.mesh.primitive_cylinder_add(vertices=64,radius=radius*I,depth=depth*I,location=(0,0,z*I));obj=bpy.context.object
-    mod=obj.modifiers.new('Soft timber edges','BEVEL');mod.width=.12*I;mod.segments=3;bpy.ops.object.modifier_apply(modifier=mod.name);finish(obj,name,'wood',table)
-for angle in [0,math.pi/2,math.pi,3*math.pi/2]:
-    obj=rounded_box('Pedestal foot',(2.2,7.5,2),(math.sin(angle)*3.2,math.cos(angle)*3.2,1.1),.35,'wood',table);obj.rotation_euler.z=-angle
+    mod=obj.modifiers.new('Soft finished edges','BEVEL');mod.width=(.12 if role=='wood' else .08)*I;mod.segments=3;bpy.ops.object.modifier_apply(modifier=mod.name);finish(obj,name,role,table)
 bpy.ops.object.select_all(action='SELECT');bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'Assets/window-seating.blend'))
 bpy.ops.export_scene.gltf(filepath=str(ROOT/'Assets/window-seating.glb'),export_format='GLB',export_extras=True,export_yup=True,export_cameras=False,export_lights=False)
 print('WINDOW_SEATING_COMPLETE',len(bpy.context.scene.objects),flush=True)

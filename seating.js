@@ -23,10 +23,10 @@ function leatherMaterial(){
 }
 
 export async function installWindowSeating(inspired,photoMaterials){
-  const asset=await new GLTFLoader().loadAsync('./Assets/window-seating.glb?v=20261103-seating');
+  const asset=await new GLTFLoader().loadAsync('./Assets/window-seating.glb?v=20261103-single-seat');
   const group=asset.scene;group.name='window-reading-seating';group.userData={seatingGroup:true,chairs:2,chairSize:[30,31,31],tableDiameter:18,tableHeight:21.625};
-  const leather=leatherMaterial(),seam=new THREE.MeshStandardMaterial({color:'#74482d',roughness:.82}),flipped=new Set();
-  group.traverse(o=>{if(o.isMesh){const role=o.userData.seatingRole||o.material.name;o.userData.seatingRole=role;o.material=role==='wood'?photoMaterials.wood:role==='pillow'?inspired.fabricMaterials.pattern:role==='pillow-seam'?inspired.fabricMaterials.white:role==='seam'?seam:leather;
+  const leather=leatherMaterial(),seam=new THREE.MeshStandardMaterial({color:'#74482d',roughness:.82}),metal=new THREE.MeshStandardMaterial({color:'#151719',metalness:.8,roughness:.4}),flipped=new Set();
+  group.traverse(o=>{if(o.isMesh){const role=o.userData.seatingRole||o.material.name;o.userData.seatingRole=role;o.material=role==='wood'?photoMaterials.wood:role==='metal'?metal:role==='pillow'?inspired.fabricMaterials.pattern:role==='pillow-seam'?inspired.fabricMaterials.white:role==='seam'?seam:leather;
     if(!flipped.has(o.geometry)){const uv=o.geometry.attributes.uv;if(uv)for(let i=0;i<uv.count;i++)uv.setY(i,1-uv.getY(i));flipped.add(o.geometry);}
     o.castShadow=o.receiveShadow=true;}});
   // Soft contact shadows supplement the fixed room atlas for the added pieces.
@@ -41,7 +41,7 @@ export async function installWindowSeating(inspired,photoMaterials){
 }
 
 export async function installSeatingLighting(scene){
-  const base='./Textures/Seating/',version='?v=20261103-seating-smooth';
+  const base='./Textures/Seating/',version='?v=20261103-single-seat';
   const [manifest,day,night]=await Promise.all([fetch(base+'manifest.json'+version).then(r=>{if(!r.ok)throw new Error('Seating lighting manifest missing');return r.json();}),fetch(base+'day.bin'+version).then(r=>r.arrayBuffer()),fetch(base+'night.bin'+version).then(r=>r.arrayBuffer())]);
   const values={day:new Uint16Array(day),night:new Uint16Array(night)},entries=[];
   for(const record of manifest.records){
