@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.js';
-import { createInspiredDesign } from './designs.js?v=20261103-rail-art';
+import { createInspiredDesign } from './designs.js?v=20261103-seating';
 import { createVaultedCeiling } from './vaulted.js?v=20261103-day-restore';
 import { createWindowReflections } from './glass.js?v=20261103-quality';
 import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js?v=20261103-quality';
@@ -7,6 +7,7 @@ import { createAntiqueFurniture } from './antique-furniture.js';
 import { miteredRail, miteredFrameBand } from './joinery.js';
 import { createPhotoExterior } from './exterior.js?v=20261103-day-restore';
 import { installRefinedSoftgoods, installBakedLighting, followWallLighting } from './quality.js?v=20261103-day-restore';
+import { installWindowSeating, installSeatingLighting } from './seating.js?v=20261103-seating';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.
 const INCH = 0.0254;
@@ -257,11 +258,14 @@ dimension([3,89,9],[166,89,9],'169″ · 14′ 1″');dimension([9,89,3],[9,89,1
 const originalColliders=colliders.slice();
 const antiqueFurniture=createAntiqueFurniture({scene,INCH,box,rod,cylinder,m,materials:photoMaterials});
 const inspired=createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photoMaterials});
+await inspired.ready;
 const refinedSoftgoods=await installRefinedSoftgoods(inspired);
 const vaulted=createVaultedCeiling({scene,INCH,box,rod,cylinder,m,paint,trim,glowTexture,reflections});
 const bakedLighting=window.ROOM_BAKE_EXPORT?{metadata:null,setLighting(){}}:await installBakedLighting(scene);
 const westWallPainting=inspired.addWestWallPainting();
 const updateWestPaintingLighting=followWallLighting(scene,westWallPainting);
+const windowSeating=await installWindowSeating(inspired,photoMaterials);
+const seatingLighting=window.ROOM_BAKE_EXPORT?{metadata:null,setLighting(){}}:await installSeatingLighting(scene);
 const floorOriginals=oakMats.map(mat=>({map:mat.map,roughness:mat.roughness}));
 let activeDesign=1;
 let yaw=0,pitch=0,dragging=false,lastX=0,lastY=0,fanOn=false,night=false;
@@ -284,6 +288,7 @@ function lighting(evening){
   const enhanced=activeDesign===4;
   bakedLighting.setLighting(evening,enhanced);
   updateWestPaintingLighting();
+  seatingLighting.setLighting(evening,enhanced);
   scene.background=evening?new THREE.Color('#000000'):skybox;
   exterior.visible=!evening;
   nightExterior.visible=evening;
@@ -377,4 +382,4 @@ const initialDesign=Number(new URLSearchParams(location.search).get('design')||1
 setDesign([1,2,3,4].includes(initialDesign)?initialDesign:1);
 renderer.render(scene,camera);$('loading').remove();requestAnimationFrame(animate);
 // Read-only scene access is useful when checking dimensions and browser rendering.
-window.roomStudy={scene,camera,renderer,ROOM,colliders,photoFloor,photoMaterials,antiqueFurniture,setView,allowed,lighting,setDesign,inspired,vaulted,ceiling,quality:{refinedSoftgoods,bakedLighting:bakedLighting.metadata},get activeDesign(){return activeDesign;}};
+window.roomStudy={scene,camera,renderer,ROOM,colliders,photoFloor,photoMaterials,antiqueFurniture,setView,allowed,lighting,setDesign,inspired,vaulted,ceiling,windowSeating,quality:{refinedSoftgoods,bakedLighting:bakedLighting.metadata,seatingLighting:seatingLighting.metadata},get activeDesign(){return activeDesign;}};

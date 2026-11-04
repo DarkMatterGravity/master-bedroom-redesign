@@ -76,6 +76,8 @@ function portraitPainting(){
 
 export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photoMaterials}){
   const group=new THREE.Group();group.name='inspired-design';group.visible=false;scene.add(group);
+  const oceanArtwork=new THREE.Texture();oceanArtwork.colorSpace=THREE.SRGBColorSpace;oceanArtwork.anisotropy=8;
+  const artworkReady=new THREE.TextureLoader().loadAsync('./Images/Art/ocean-expressionist.jpg?v=20261103-seating').then(texture=>{oceanArtwork.image=texture.image;oceanArtwork.needsUpdate=true;});
   const solids=[],lights=[];
   const addCollider=(x,z,w,d)=>solids.push({x:x*INCH,z:z*INCH,w:w*INCH/2,d:d*INCH/2});
   const linenMaps=surface('linen','#ede8dc',7),walnutMaps=surface('wood','#725039',1),plasterMaps=surface('plaster','#ffffff',6),rugMaps=surface('rug','#b8b1a1',14);
@@ -185,7 +187,7 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
   box(62,28,.25,62,79,185.2,frame,painting);
   addBlackFrame(68,34,3,62,79,184.7,frameBlack,painting);
   painting.userData.frame={width:68,height:34,border:3};
-  const art=new THREE.Mesh(new THREE.PlaneGeometry(62*INCH,28*INCH),m('#ffffff',.92,{map:landscapePainting(),normalMap:linenMaps.normalMap,normalScale:new THREE.Vector2(.08,.08),roughnessMap:linenMaps.roughnessMap}));
+  const art=new THREE.Mesh(new THREE.PlaneGeometry(62*INCH,28*INCH),m('#ffffff',.92,{map:oceanArtwork,normalMap:linenMaps.normalMap,normalScale:new THREE.Vector2(.08,.08),roughnessMap:linenMaps.roughnessMap}));
   art.rotation.y=Math.PI;art.position.set(62*INCH,79*INCH,184.8*INCH);art.receiveShadow=true;painting.add(art);
   const galleryFixture=new THREE.Group();galleryFixture.name='painting-gallery-light';group.add(galleryFixture);
   box(8,1.2,.4,62,94.5,185.5,fixtureBlack,galleryFixture,.1);
@@ -239,7 +241,7 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
 
   const ceilingFixture=new THREE.Group();group.add(ceilingFixture);
   let westPainting=null;
-  return {group,bedFrame,ceilingFixture,featureWall,painting,tallPainting,galleryFixture,galleryLights,colliders:solids,lights,plasterMaps,floorFinish,bedSize:[76,80],fabricMaterials:{white,pattern:patterned,slate,curtain:curtainLinen},
+  return {group,ready:artworkReady,bedFrame,ceilingFixture,featureWall,painting,tallPainting,galleryFixture,galleryLights,colliders:solids,lights,plasterMaps,floorFinish,bedSize:[76,80],fabricMaterials:{white,pattern:patterned,slate,curtain:curtainLinen},
     addWestWallPainting(){
       if(westPainting)return westPainting;
       const width=22,height=26,border=2.6,railTop=chairHeight+1.6,centerY=railTop+height/2;

@@ -86,3 +86,20 @@ The Blender scripts create technical mesh/light-map assets, not architectural
 still images. Browser screenshots and intermediate baking files stay in the
 ignored `previews/` directory. Three.js add-ons are pinned to r180 and covered
 by `vendor/LICENSE`.
+
+`build-window-seating.py` creates the editable barrel-chair pair and matching
+round table in `Assets/window-seating.blend` and exports its GLB. Chair centres
+are X=28/88, Z=29 inches, angled inward 20 degrees; the 18-inch table is centred
+at X=58, Z=32 with a 21.625-inch top. To rebuild the added seating lighting:
+
+```powershell
+& 'C:/Program Files/Blender Foundation/Blender 5.2/blender.exe' -b -t 8 --python tools/build-window-seating.py
+node tools/export-room.cjs --include-seating
+& 'C:/Program Files/Blender Foundation/Blender 5.2/blender.exe' -b -t 8 --python tools/bake-seating-lighting.py
+```
+
+This uses the established room lights and five diffuse bounces at 512 samples,
+with smooth normals for the curved upholstery. Only the 29 new meshes receive
+the separate `Textures/Seating` float16 buffers; the existing room atlas stays
+valid. Normal room exports omit this extension unless `--include-seating` is
+specified. The large canvas bitmap and prompt are in `Images/Art`.

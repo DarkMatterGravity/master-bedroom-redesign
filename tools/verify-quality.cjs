@@ -7,7 +7,15 @@ let browser;
   page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   const start=Date.now();await page.goto(process.env.ROOM_URL||'http://127.0.0.1:8000/?design=4');await page.waitForFunction(()=>!!window.roomStudy,null,{timeout:120000});
   const loadMs=Date.now()-start;
+  const seating=await page.evaluate(()=>{const r=roomStudy,meshes=[];r.windowSeating.traverse(o=>{if(o.isMesh&&o.userData.seatingRole)meshes.push(o);});return {chairs:r.windowSeating.userData.chairs,meshes:meshes.length,lit:meshes.filter(o=>o.geometry.attributes.seatingday&&o.geometry.attributes.seatingnight).length,woodMatches:meshes.filter(o=>o.userData.seatingRole==='wood').every(o=>o.material.map===r.photoMaterials.wood.map),walkway:r.allowed(58*.0254,65*.0254),artLoaded:r.inspired.painting.children.some(o=>o.material?.map?.image?.width>1000)};});
+  if(seating.chairs!==2||seating.meshes!==29||seating.lit!==29||!seating.woodMatches||!seating.walkway||!seating.artLoaded)errors.push('Seating or abstract artwork failed: '+JSON.stringify(seating));
   const facts=await page.evaluate(()=>{const r=roomStudy;let refined=0,baked=0;r.quality.refinedSoftgoods.traverse(o=>{if(o.isMesh)refined++;});r.scene.traverseVisible(o=>{if(o.isMesh&&o.material?.lightMap)baked++;});return {refined,baked,bake:r.quality.bakedLighting,environment:!!r.scene.environment,triangles:r.renderer.info.render.triangles};});
+  for(const night of [false,true]){
+    await page.evaluate(n=>roomStudy.lighting(n),night);
+    await page.evaluate(()=>{const r=roomStudy;r.camera.position.set(118*.0254,64*.0254,84*.0254);r.camera.lookAt(53*.0254,19*.0254,28*.0254);});
+    await page.screenshot({path:`previews/quality-seating-${night?'night':'day'}.png`});
+  }
+  await page.evaluate(()=>roomStudy.lighting(false));
   await page.evaluate(()=>{const r=roomStudy;r.camera.position.set(62*.0254,62*.0254,82*.0254);r.camera.lookAt(62*.0254,37*.0254,182*.0254);r.camera.fov=64;r.camera.updateProjectionMatrix();});
   await page.screenshot({path:'previews/quality-day-bed.png'});
   await page.click('#day-night');await page.screenshot({path:'previews/quality-night-bed.png'});
@@ -65,6 +73,6 @@ let browser;
   await mobile.goto(process.env.ROOM_URL||'http://127.0.0.1:8000/?design=4');await mobile.waitForFunction(()=>!!window.roomStudy,null,{timeout:120000});
   const mobileFacts=await mobile.evaluate(()=>{const r=roomStudy;let atlas=0;r.scene.traverseVisible(o=>{if(o.material?.lightMap)atlas=o.material.lightMap.image.width;});return {atlas,overflow:document.documentElement.scrollWidth>innerWidth,triangles:r.renderer.info.render.triangles};});
   await mobile.screenshot({path:'previews/quality-mobile.png'});if(mobileFacts.atlas!==1024||mobileFacts.overflow)errors.push('Mobile quality tier failed');
-  const result={loadMs,facts,finish,...coverage,original,mobileFacts,errors};fs.writeFileSync('previews/quality-check.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+  const result={loadMs,seating,facts,finish,...coverage,original,mobileFacts,errors};fs.writeFileSync('previews/quality-check.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
   await browser.close();if(errors.length)process.exitCode=1;
 })().catch(async e=>{console.error(e);await browser?.close();process.exitCode=1;});
