@@ -84,18 +84,39 @@ export function createVaultedCeiling({scene,INCH,box,rod,cylinder,m,paint,trim,g
     const texture=new THREE.TextureLoader().load(path,tex=>{
       tex.repeat.set(width,height);tex.offset.set(offsetX,1-height);
     });texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=8;
-    const geometry=new THREE.PlaneGeometry(160*INCH,160*INCH),uv=geometry.attributes.uv;
-    for(let i=0;i<uv.count;i++)uv.setXY(i,(uv.getX(i)-.5)*160/44+.5,(uv.getY(i)-.5)*160/44+.5);
-    const material=new THREE.MeshBasicMaterial({map:texture,toneMapped:false});
+    // A room-fixed canopy dome gives the view real distance from the glazing.
+    // Its UVs preserve the former framing from a standing position by the bed.
+    const radius=26,eye=new THREE.Vector3(62*INCH,64*INCH,62*INCH);
+    const geometry=new THREE.SphereGeometry(radius,96,48),uv=geometry.attributes.uv,p=geometry.attributes.position;
+    for(let i=0;i<p.count;i++){
+      const x=p.getX(i),y=p.getY(i),z=p.getZ(i),depth=Math.max(.001,-z),t=(eye.z+2.3*INCH)/depth;
+      uv.setXY(i,(eye.x+x*t-wx*INCH)/(44*INCH)+.5,(eye.y+y*t-wy*INCH)/(44*INCH)+.5);
+    }
+    const material=new THREE.MeshBasicMaterial({map:texture,toneMapped:false,side:THREE.BackSide,depthWrite:false});
     material.onBeforeCompile=shader=>{
       shader.uniforms.canopyCrop={value:new THREE.Vector4(offsetX,1-height,offsetX+width,1)};
-      shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nuniform vec4 canopyCrop;').replace('#include <map_fragment>','#ifdef USE_MAP\ndiffuseColor*=texture2D(map,clamp(vMapUv,canopyCrop.xy,canopyCrop.zw));\n#endif');
+      shader.uniforms.canopyPortal={value:new THREE.Vector4(bottom*INCH,top*INCH,149*INCH,177*INCH)};
+      shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 canopyWorldPosition;').replace('#include <begin_vertex>','#include <begin_vertex>\ncanopyWorldPosition=(modelMatrix*vec4(transformed,1.0)).xyz;');
+      shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nuniform vec4 canopyCrop;uniform vec4 canopyPortal;varying vec3 canopyWorldPosition;').replace('#include <map_fragment>',`vec3 canopyDirection=canopyWorldPosition-cameraPosition;
+        if(canopyDirection.x>=-0.0001)discard;
+        float portalT=-cameraPosition.x/canopyDirection.x;
+        vec3 crossing=cameraPosition+portalT*canopyDirection;
+        if(portalT<=0.0||portalT>=1.0||crossing.y<canopyPortal.x||crossing.y>canopyPortal.y||crossing.z<canopyPortal.z||crossing.z>canopyPortal.w)discard;
+        #ifdef USE_MAP
+        vec2 cropSize=canopyCrop.zw-canopyCrop.xy;
+        vec2 cropUV=(vMapUv-canopyCrop.xy)/cropSize;
+        vec2 edge=min(cropUV,1.0-cropUV);
+        float captured=smoothstep(0.0,0.07,min(edge.x,edge.y));
+        vec4 skyColor=texture2D(map,vec2(0.96,clamp(vMapUv.y,canopyCrop.y,canopyCrop.w)));
+        vec4 canopyColor=texture2D(map,clamp(vMapUv,canopyCrop.xy,canopyCrop.zw));
+        diffuseColor*=mix(skyColor,canopyColor,captured);
+        #endif`);
     };
-    material.customProgramCacheKey=()=> 'upper-canopy-edge-clamp-v2';
-    // Cover oblique views from the navigable room while keeping the card clear
-    // of the lower front window. Clamp to the sky-only crop at its outer edges.
+    material.customProgramCacheKey=()=> 'upper-canopy-distant-portal-v1';
+    // Portal clipping keeps the distant dome visible through this opening
+    // while the other windows retain their own original exterior photographs.
     const view=new THREE.Mesh(geometry,material);
-    view.name=name;view.position.set(wx*INCH,wy*INCH,-2.3*INCH);highWindow.add(view);return view;
+    view.name=name;view.position.copy(eye);view.userData={backdropRadiusMeters:radius,projection:'distant-canopy-dome'};highWindow.add(view);return view;
   }
   const daySky=canopyView('./Images/Exterior/view-00.jpg',0,'upper-window-day-sky');
   const nightSky=canopyView('./Images/Exterior/Night/view-00.jpg',.32,'upper-window-night-sky');nightSky.visible=false;

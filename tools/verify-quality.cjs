@@ -18,7 +18,7 @@ let browser;
   if(finish.wallColor!=='eeeae4'||finish.wallRoughness!==.42||finish.mouldingRoughness!==.6||finish.trimRoughness!==.6)errors.push('Soft-white satin/eggshell finishes failed');
   for(const mode of ['day','night']){
     if(mode==='night')await page.click('#day-night');
-    for(const [name,position,target] of [['gable',[87,65,109],[0,105,130]],['door',[100,64,92],[146,68,120]],['corner',[90,70,125],[124,133,170]],['base',[26,44,65],[0,15,42]],['upper-trim',[65,108,142],[0,140,163]],['pillow-detail',[62,54,125],[62,39,172]],['duvet-foot',[110,43,84],[84,23,112]],['duvet-side',[112,32,115],[96,22,131]],['porch-roof',[25,64,42],[0,32,42]],['street-car',[20,64,40],[0,48,56]],['brown-house',[75,64,25],[91,41,0]],['near-fence',[62,64,15],[62,30,0]]]){
+    for(const [name,position,target] of [['gable',[87,65,109],[0,105,130]],['door',[100,64,92],[146,68,120]],['corner',[90,70,125],[124,133,170]],['base',[26,44,65],[0,15,42]],['upper-trim',[65,108,142],[0,140,163]],['west-painting',[70,64,94],[0,84,116]],['pillow-detail',[62,54,125],[62,39,172]],['duvet-foot',[110,43,84],[84,23,112]],['duvet-side',[112,32,115],[96,22,131]],['porch-roof',[25,64,42],[0,32,42]],['street-car',[20,64,40],[0,48,56]],['brown-house',[75,64,25],[91,41,0]],['near-fence',[62,64,15],[62,30,0]]]){
       await page.evaluate(({position,target})=>{const r=roomStudy;r.camera.position.set(...position.map(n=>n*.0254));r.camera.lookAt(...target.map(n=>n*.0254));r.camera.fov=60;r.camera.updateProjectionMatrix();},{position,target});
       await page.screenshot({path:`previews/smooth-${mode}-${name}.png`});
     }
@@ -33,12 +33,13 @@ let browser;
         const origin=new T.Vector3(...position.map(v=>v*.0254)),target=new T.Vector3(0,(r.vaulted.peak-50+dy)*.0254,(163+dz)*.0254);
         const ray=new T.Raycaster(origin,target.sub(origin).normalize());
         const hit=ray.intersectObject(sky,false)[0];
-        if(hit?.object.name!==(night?'upper-window-night-sky':'upper-window-day-sky'))misses.push({night,position,dz,dy,hit:hit?.object.name});
+        if(hit?.object.name!==(night?'upper-window-night-sky':'upper-window-day-sky')||hit.distance<15)misses.push({night,position,dz,dy,hit:hit?.object.name});
       }
     }
     const exteriorMisses=[];
     for(const night of [false,true]){
       r.lighting(night);const exterior=r.scene.getObjectByName(night?'night-exterior':'exterior'),back=exterior.getObjectByName('continuous-exterior-coverage');
+      if(!back){if(night||exterior.userData.type!=='calibrated-cylindrical-photo-band'||exterior.children.length!==11)exteriorMisses.push({night,reason:'Original daytime band missing'});continue;}
       for(const position of [[7,64,7],[7,64,115],[118,64,7],[118,64,115]])for(const target of [[30,30,0],[54,80,0],[65,30,0],[92,80,0],[0,30,29],[0,80,55]]){
         const camera=new T.Vector3(...position.map(v=>v*.0254)),window=new T.Vector3(...target.map(v=>v*.0254)),direction=window.clone().sub(camera).normalize();
         const ray=new T.Raycaster(window.addScaledVector(direction,.002),direction);

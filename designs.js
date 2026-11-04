@@ -238,7 +238,19 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
   }curtains(60.5,0,0,71);curtains(0,42,Math.PI/2);
 
   const ceilingFixture=new THREE.Group();group.add(ceilingFixture);
+  let westPainting=null;
   return {group,bedFrame,ceilingFixture,featureWall,painting,tallPainting,galleryFixture,galleryLights,colliders:solids,lights,plasterMaps,floorFinish,bedSize:[76,80],fabricMaterials:{white,pattern:patterned,slate,curtain:curtainLinen},
+    addWestWallPainting(){
+      if(westPainting)return westPainting;
+      westPainting=new THREE.Group();westPainting.name='west-wall-companion-painting';
+      westPainting.position.set(2*INCH,84*INCH,116*INCH);westPainting.rotation.y=Math.PI/2;
+      westPainting.userData={width:36,height:30,border:3,centerY:84,centerZ:116,wall:'west',followSurfaceLighting:true};
+      addBlackFrame(36,30,3,0,0,0,frameBlack,westPainting);
+      box(30,24,.2,0,0,0,frameBlack,westPainting);
+      const texture=landscapePainting();texture.repeat.set(.563,1);texture.offset.set(.2185,0);
+      const canvas=new THREE.Mesh(new THREE.PlaneGeometry(30*INCH,24*INCH),m('#ffffff',.92,{map:texture,normalMap:linenMaps.normalMap,normalScale:new THREE.Vector2(.08,.08)}));
+      canvas.name='west-wall-coastal-artwork';canvas.position.z=.3*INCH;westPainting.add(canvas);group.add(westPainting);return westPainting;
+    },
     setFeatureHeight(height){
       featureBase.scale.y=height/96;featureBase.position.y=height/2*INCH;
       for(const {board,bottom} of featureBoards){

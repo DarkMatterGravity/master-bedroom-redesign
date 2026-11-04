@@ -1,12 +1,12 @@
 import * as THREE from './vendor/three.module.js';
-import { createInspiredDesign } from './designs.js?v=20261103-bedding';
-import { createVaultedCeiling } from './vaulted.js?v=20261103-coverage';
+import { createInspiredDesign } from './designs.js?v=20261103-day-restore';
+import { createVaultedCeiling } from './vaulted.js?v=20261103-day-restore';
 import { createWindowReflections } from './glass.js?v=20261103-quality';
 import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js?v=20261103-quality';
 import { createAntiqueFurniture } from './antique-furniture.js';
 import { miteredRail, miteredFrameBand } from './joinery.js';
-import { createPhotoExterior } from './exterior.js?v=20261103-anchored';
-import { installRefinedSoftgoods, installBakedLighting } from './quality.js?v=20261103-bedding';
+import { createPhotoExterior } from './exterior.js?v=20261103-day-restore';
+import { installRefinedSoftgoods, installBakedLighting, followWallLighting } from './quality.js?v=20261103-day-restore';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.
 const INCH = 0.0254;
@@ -260,6 +260,8 @@ const inspired=createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photoM
 const refinedSoftgoods=await installRefinedSoftgoods(inspired);
 const vaulted=createVaultedCeiling({scene,INCH,box,rod,cylinder,m,paint,trim,glowTexture,reflections});
 const bakedLighting=window.ROOM_BAKE_EXPORT?{metadata:null,setLighting(){}}:await installBakedLighting(scene);
+const westWallPainting=inspired.addWestWallPainting();
+const updateWestPaintingLighting=followWallLighting(scene,westWallPainting);
 const floorOriginals=oakMats.map(mat=>({map:mat.map,roughness:mat.roughness}));
 let activeDesign=1;
 let yaw=0,pitch=0,dragging=false,lastX=0,lastY=0,fanOn=false,night=false;
@@ -281,6 +283,7 @@ function lighting(evening){
   night=evening;
   const enhanced=activeDesign===4;
   bakedLighting.setLighting(evening,enhanced);
+  updateWestPaintingLighting();
   scene.background=evening?new THREE.Color('#000000'):skybox;
   exterior.visible=!evening;
   nightExterior.visible=evening;

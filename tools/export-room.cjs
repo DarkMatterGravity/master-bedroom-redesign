@@ -23,6 +23,7 @@ let browser;
     }
     function visit(o,path,visible){visible=visible&&o.visible;if(!visible)return;
       if(['exterior','night-exterior','closed-west-plantation-shutters'].includes(o.name))return;
+      if(o.userData.followSurfaceLighting)return;
       if(o.isMesh&&o.geometry?.attributes.position&&o.material?.isMeshStandardMaterial&&!o.material.transparent){
         const g=o.geometry,p=g.attributes.position,uv=g.attributes.uv,positions=[];const e=o.matrixWorld.elements;
         for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i);positions.push(e[0]*x+e[4]*y+e[8]*z+e[12],e[1]*x+e[5]*y+e[9]*z+e[13],e[2]*x+e[6]*y+e[10]*z+e[14]);}

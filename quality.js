@@ -20,6 +20,24 @@ export async function installRefinedSoftgoods(inspired){
 
 const lightingAsset=path=>`${path}?v=20261103-bedding`;
 
+// Small additions on a wall can share its existing diffuse illumination.
+// Sample each piece's wall illumination so day/night changes match its setting.
+// A constant sample avoids interpolating between separate wall atlas charts.
+export function followWallLighting(scene,group){
+  scene.updateMatrixWorld(true);const surfaces=[],entries=[];
+  scene.traverse(o=>{if(o.isMesh&&o.geometry.attributes.uv1)surfaces.push(o);});
+  const ray=new THREE.Raycaster(),point=new THREE.Vector3();ray.far=.3;
+  group.traverse(object=>{
+    if(!object.isMesh)return;
+    object.material=object.material.clone();const p=object.geometry.attributes.position,uv=new Float32Array(p.count*2);let surface=null;
+    object.geometry.computeBoundingBox();object.geometry.boundingBox.getCenter(point).applyMatrix4(object.matrixWorld);point.x+=.0254;
+    ray.set(point,new THREE.Vector3(-1,0,0));const hit=ray.intersectObjects(surfaces,false).find(h=>h.uv1);
+    if(hit){for(let i=0;i<p.count;i++){uv[i*2]=hit.uv1.x;uv[i*2+1]=hit.uv1.y;}surface=hit.object;}
+    if(surface){object.geometry.setAttribute('uv1',new THREE.BufferAttribute(uv,2));entries.push({object,surface});}
+  });
+  return ()=>{for(const {object,surface} of entries){object.material.lightMap=surface.material.lightMap;object.material.lightMapIntensity=surface.material.lightMapIntensity;object.material.needsUpdate=true;}};
+}
+
 export async function installBakedLighting(scene){
   const [manifest,buffer,clothDay,clothNight]=await Promise.all([
     fetch(lightingAsset('./Textures/Lighting/manifest.json')).then(r=>{if(!r.ok)throw new Error('Room lighting manifest missing');return r.json();}),

@@ -5,6 +5,11 @@
 intervals from IMG_7579.MOV (0 through 8 seconds, including its final frame).
 The original movie and unused source photos remain local.
 
+The current daytime viewer restores the first calibrated photo band: those
+two stills and nine original frames on a 24-meter cylinder, with the original
+positions, cropping and feathering. The later generated daytime panorama is
+retained as an experimental asset. Night continues to use its stitched panorama.
+
 `cameras.json` records focal length, principal point and relative camera
 rotation estimated from SIFT feature matches and refined with OpenCV's
 rotation bundle adjustment. Intrinsics are in each source image's pixels.
@@ -35,7 +40,7 @@ facades remain intact; it has no hard elevation cutoff across the window view.
 and near-fence views in both modes. Inspect those images in `previews/` when
 changing the stitch; geometric coverage tests alone cannot detect cut objects.
 
-`exterior.js` displays one spherical mesh per mode at a 24-meter radius. The
+The panorama implementation displays its spherical mesh at a 24-meter radius. The
 water photograph faces the paired north windows; the front photograph faces
 west. There are no overlapping runtime photo panels or clamped edge samples.
 Night uses its own stitched texture from the calibrated frames in `Night/`.
@@ -49,4 +54,8 @@ These are photographic surroundings, not reconstructed buildings. Nearby
 fences/branches can retain small parallax differences between captures. Areas
 never photographed use a soft color continuation, with clear sky above the
 horizon; coverage masks record which pixels came from the actual captures.
-The upper window retains its separate sky-cropped backdrop.
+The upper window uses a 26-meter canopy dome with a window-opening mask. Its
+sky and tree crop is anchored in room coordinates; movement reveals different
+parts of that distant image through the frame. Beyond the captured crop it
+blends to sky colour, avoiding stretched border pixels. This view is confined
+to the upper opening so the three main windows retain their own surroundings.

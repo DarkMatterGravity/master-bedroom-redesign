@@ -74,6 +74,13 @@ with 512 samples and the original lights/bounce settings. The existing room
 atlas and UV packing remain intact. The quality check includes pillow/duvet
 close-ups and 150 rays testing mattress occlusion from above, the foot and sides.
 
+The small west-wall companion painting samples the existing wall's baked
+illumination for each frame piece and canvas. `followWallLighting` updates
+those samples for day/night; the exporter omits the painting's separate lighting
+extension so the established room/cloth manifest stays valid. The painting is
+36 by 30 inches with the same three-inch black frame, centred at 84 inches high
+and Z=116 inches, clear of the chair rail.
+
 The Blender scripts create technical mesh/light-map assets, not architectural
 still images. Browser screenshots and intermediate baking files stay in the
 ignored `previews/` directory. Three.js add-ons are pinned to r180 and covered
