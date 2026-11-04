@@ -78,8 +78,9 @@ The small west-wall companion painting samples the existing wall's baked
 illumination for each frame piece and canvas. `followWallLighting` updates
 those samples for day/night; the exporter omits the painting's separate lighting
 extension so the established room/cloth manifest stays valid. The painting is
-36 by 30 inches with the same three-inch black frame, centred at 84 inches high
-and Z=116 inches, clear of the chair rail.
+22 by 26 inches with a 2.6-inch black frame matching the wedding photo. Its
+bottom rests on the 61.6-inch chair rail, and its top is at 87.6 inches, close
+to the bed-wall frame's 88-inch top. Its centre remains at Z=116 inches.
 
 The Blender scripts create technical mesh/light-map assets, not architectural
 still images. Browser screenshots and intermediate baking files stay in the

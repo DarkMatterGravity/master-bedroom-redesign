@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.js';
-import { createInspiredDesign } from './designs.js?v=20261103-day-restore';
+import { createInspiredDesign } from './designs.js?v=20261103-rail-art';
 import { createVaultedCeiling } from './vaulted.js?v=20261103-day-restore';
 import { createWindowReflections } from './glass.js?v=20261103-quality';
 import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js?v=20261103-quality';
