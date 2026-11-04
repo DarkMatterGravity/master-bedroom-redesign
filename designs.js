@@ -80,6 +80,8 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
   const artworkReady=new THREE.TextureLoader().loadAsync('./Images/Art/ocean-expressionist.jpg?v=20261103-seating').then(texture=>{oceanArtwork.image=texture.image;oceanArtwork.needsUpdate=true;});
   const nauticalChart=new THREE.Texture();nauticalChart.colorSpace=THREE.SRGBColorSpace;nauticalChart.anisotropy=8;
   const chartReady=new THREE.TextureLoader().loadAsync('./Images/Art/sandy-hook-1784.jpg?v=20261103-single-seat').then(texture=>{nauticalChart.image=texture.image;nauticalChart.needsUpdate=true;});
+  const railPhoto=new THREE.Texture();railPhoto.colorSpace=THREE.SRGBColorSpace;railPhoto.anisotropy=8;let railPhotoAspect=1;
+  const railPhotoReady=new THREE.TextureLoader().loadAsync('./Images/References/Family-doughnut-photo.jpg?v=20261103-rail-photo').then(texture=>{railPhoto.image=texture.image;railPhotoAspect=texture.image.width/texture.image.height;railPhoto.needsUpdate=true;});
   const solids=[],lights=[];
   const addCollider=(x,z,w,d)=>solids.push({x:x*INCH,z:z*INCH,w:w*INCH/2,d:d*INCH/2});
   const linenMaps=surface('linen','#ede8dc',7),walnutMaps=surface('wood','#725039',1),plasterMaps=surface('plaster','#ffffff',6),rugMaps=surface('rug','#b8b1a1',14);
@@ -245,7 +247,7 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
 
   const ceilingFixture=new THREE.Group();group.add(ceilingFixture);
   let westPainting=null;
-  return {group,ready:Promise.all([artworkReady,chartReady]),bedFrame,ceilingFixture,featureWall,painting,tallPainting,galleryFixture,galleryLights,colliders:solids,lights,plasterMaps,floorFinish,bedSize:[76,80],fabricMaterials:{white,pattern:patterned,slate,curtain:curtainLinen},
+  return {group,ready:Promise.all([artworkReady,chartReady,railPhotoReady]),bedFrame,ceilingFixture,featureWall,painting,tallPainting,galleryFixture,galleryLights,colliders:solids,lights,plasterMaps,floorFinish,bedSize:[76,80],fabricMaterials:{white,pattern:patterned,slate,curtain:curtainLinen},
     addWestWallPainting(){
       if(westPainting)return westPainting;
       const width=22,height=26,border=2.6,railTop=chairHeight+1.6,centerY=railTop+height/2;
@@ -255,9 +257,11 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
       westPainting.userData={width,height,border,centerY,centerZ:116,bottom:railTop,top:railTop+height,wall:'west',followSurfaceLighting:true};
       addBlackFrame(width,height,border,0,0,0,frameBlack,westPainting);
       box(artWidth,artHeight,.2,0,0,0,frameBlack,westPainting);
-      const texture=landscapePainting(),crop=(artWidth/artHeight)/(1110/500);texture.repeat.set(crop,1);texture.offset.set((1-crop)/2,0);
-      const canvas=new THREE.Mesh(new THREE.PlaneGeometry(artWidth*INCH,artHeight*INCH),m('#ffffff',.92,{map:texture,normalMap:linenMaps.normalMap,normalScale:new THREE.Vector2(.08,.08)}));
-      canvas.name='west-wall-coastal-artwork';canvas.position.z=.3*INCH;westPainting.add(canvas);group.add(westPainting);return westPainting;
+      const mat=new THREE.Mesh(new THREE.PlaneGeometry(artWidth*INCH,artHeight*INCH),m('#eee8db',.94));
+      mat.name='west-wall-photo-mat';mat.position.z=.3*INCH;westPainting.add(mat);
+      const photoWidth=Math.min(artWidth-1.2,(artHeight-1.2)*railPhotoAspect),photoHeight=photoWidth/railPhotoAspect;
+      const photo=new THREE.Mesh(new THREE.PlaneGeometry(photoWidth*INCH,photoHeight*INCH),m('#ffffff',.84,{map:railPhoto}));
+      photo.name='west-wall-family-photo';photo.position.z=.32*INCH;westPainting.add(photo);group.add(westPainting);return westPainting;
     },
     setFeatureHeight(height){
       featureBase.scale.y=height/96;featureBase.position.y=height/2*INCH;

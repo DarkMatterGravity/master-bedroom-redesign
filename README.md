@@ -255,3 +255,6 @@ in navy, slate, seafoam and ivory. Its asset and generation prompt are saved in
 The tall frame near the windows contains a geographically proportioned detail
 of John Hills's Sandy Hook nautical chart, surveyed in 1782 and published by
 William Faden in 1784. Source and public-domain attribution are in `Images/Art`.
+The small black frame resting on the west-wall chair rail displays the user's
+family doughnut photo, fitted without cropping and surrounded by a cream mat.
+The original supplied image is saved as `Images/References/Family-doughnut-photo.jpg`.
