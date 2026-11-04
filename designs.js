@@ -92,10 +92,8 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
   const panelPaint=m('#eeeae4',.42,{normalMap:plasterMaps.normalMap,normalScale:new THREE.Vector2(.16,.16),roughnessMap:plasterMaps.roughnessMap});
   const railPaint=m('#eeeae4',.6),chairHeight=60;
   const patterned=fabric({...surface('linen','#ffffff',8),map:patternedMap()},'#c1c4bf');
-  curtainLinen.map=patterned.map.clone();
-  // Preserve the pillow check size on the tall, narrow curtain panels.
-  curtainLinen.map.repeat.set(.75*12/17,.75*77/17);curtainLinen.map.needsUpdate=true;
-  curtainLinen.sheenColor.copy(patterned.sheenColor);
+  curtainLinen.map=slate.map.clone();curtainLinen.map.repeat.set(7,7);curtainLinen.map.needsUpdate=true;
+  curtainLinen.color.copy(slate.color);curtainLinen.sheenColor.copy(slate.sheenColor);
   const floorFinish=surface('wood','#a58b69',1);
 
   // Applied paneling fits the measured openings; it never covers either window.
