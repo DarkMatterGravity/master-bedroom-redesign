@@ -1,13 +1,17 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/addons/loaders/GLTFLoader.js';
 
-function leatherMaterial(){
+function leatherMaterial(slate){
+  const sample=document.createElement('canvas');sample.width=sample.height=16;const sc=sample.getContext('2d');sc.drawImage(slate.map.image,0,0,16,16);
+  const data=sc.getImageData(0,0,16,16).data,mean=new THREE.Color(0,0,0);
+  for(let i=0;i<data.length;i+=4)mean.add(new THREE.Color().setRGB(data[i]/255,data[i+1]/255,data[i+2]/255,THREE.SRGBColorSpace));
+  const base=mean.multiplyScalar(1/256).multiply(slate.color).convertLinearToSRGB().toArray().map(v=>v*255);
   const size=256,heights=new Float32Array(size*size),canvas=document.createElement('canvas');canvas.width=canvas.height=size;
   const ctx=canvas.getContext('2d'),pixels=ctx.createImageData(size,size);let seed=4731;
   for(let y=0;y<size;y++)for(let x=0;x<size;x++){
     seed=(seed*1664525+1013904223)>>>0;const n=seed/4294967296,i=y*size+x;
     const pore=Math.pow(n,6),tone=.94+n*.07+.018*Math.sin(x*.13)*Math.sin(y*.1);heights[i]=.5-pore*.16+(n-.5)*.06;
-    for(let k=0;k<3;k++)pixels.data[i*4+k]=[145,78,39][k]*tone;pixels.data[i*4+3]=255;
+    for(let k=0;k<3;k++)pixels.data[i*4+k]=base[k]*tone;pixels.data[i*4+3]=255;
   }
   ctx.putImageData(pixels,0,0);
   const normal=document.createElement('canvas'),rough=document.createElement('canvas');normal.width=normal.height=rough.width=rough.height=size;
@@ -23,9 +27,9 @@ function leatherMaterial(){
 }
 
 export async function installWindowSeating(inspired,photoMaterials){
-  const asset=await new GLTFLoader().loadAsync('./Assets/window-seating.glb?v=20261103-single-seat');
+  const asset=await new GLTFLoader().loadAsync('./Assets/window-seating.glb?v=20261103-chair-back');
   const group=asset.scene;group.name='window-reading-seating';group.userData={seatingGroup:true,chairs:2,chairSize:[30,31,31],tableDiameter:18,tableHeight:21.625};
-  const leather=leatherMaterial(),seam=new THREE.MeshStandardMaterial({color:'#74482d',roughness:.82}),metal=new THREE.MeshStandardMaterial({color:'#151719',metalness:.8,roughness:.4}),flipped=new Set();
+  const leather=leatherMaterial(inspired.fabricMaterials.slate),seam=new THREE.MeshStandardMaterial({color:'#47545e',roughness:.82}),metal=new THREE.MeshStandardMaterial({color:'#151719',metalness:.8,roughness:.4}),flipped=new Set();
   group.traverse(o=>{if(o.isMesh){const role=o.userData.seatingRole||o.material.name;o.userData.seatingRole=role;o.material=role==='wood'?photoMaterials.wood:role==='metal'?metal:role==='pillow'?inspired.fabricMaterials.pattern:role==='pillow-seam'?inspired.fabricMaterials.white:role==='seam'?seam:leather;
     if(!flipped.has(o.geometry)){const uv=o.geometry.attributes.uv;if(uv)for(let i=0;i<uv.count;i++)uv.setY(i,1-uv.getY(i));flipped.add(o.geometry);}
     o.castShadow=o.receiveShadow=true;}});
@@ -41,7 +45,7 @@ export async function installWindowSeating(inspired,photoMaterials){
 }
 
 export async function installSeatingLighting(scene){
-  const base='./Textures/Seating/',version='?v=20261103-single-seat';
+  const base='./Textures/Seating/',version='?v=20261103-chair-back';
   const [manifest,day,night]=await Promise.all([fetch(base+'manifest.json'+version).then(r=>{if(!r.ok)throw new Error('Seating lighting manifest missing');return r.json();}),fetch(base+'day.bin'+version).then(r=>r.arrayBuffer()),fetch(base+'night.bin'+version).then(r=>r.arrayBuffer())]);
   const values={day:new Uint16Array(day),night:new Uint16Array(night)},entries=[];
   for(const record of manifest.records){

@@ -5,7 +5,7 @@ from mathutils import Vector,Matrix
 ROOT=Path(__file__).resolve().parents[1];I=.0254
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
 materials={}
-for name,color in [('leather',(.32,.13,.045,1)),('seam',(.25,.105,.045,1)),('wood',(.11,.065,.035,1)),('metal',(.015,.015,.015,1)),('pillow',(.6,.6,.55,1)),('pillow-seam',(.7,.66,.58,1))]:
+for name,color in [('leather',(.04,.055,.075,1)),('seam',(.03,.04,.05,1)),('wood',(.11,.065,.035,1)),('metal',(.015,.015,.015,1)),('pillow',(.6,.6,.55,1)),('pillow-seam',(.7,.66,.58,1))]:
     mat=bpy.data.materials.new(name);mat.diffuse_color=color;materials[name]=mat
 
 def finish(obj,name,role,parent):
@@ -48,15 +48,23 @@ bpy.context.view_layer.objects.active=obj;obj.select_set(True)
 bpy.ops.object.mode_set(mode='EDIT');bpy.ops.mesh.select_all(action='SELECT');bpy.ops.mesh.remove_doubles(threshold=.00001);bpy.ops.mesh.normals_make_consistent(inside=False);bpy.ops.object.mode_set(mode='OBJECT')
 sub=obj.modifiers.new('Cushioned barrel surface','SUBSURF');sub.levels=2;bpy.ops.object.modifier_apply(modifier=sub.name)
 finish(obj,'Wraparound leather back and arms','leather',chair)
+def fit_seat_back(x,y):
+    # The rear corners must follow the curved barrel, rather than the square
+    # footprint of the seat front. Keep them inside the outer upholstery.
+    if y>0:
+        radius=math.hypot(x/13.5,y/13.05)
+        if radius>1:x/=radius;y/=radius
+    return x,y
+
 for name,dimensions,center,power in [('Single upholstered seat',(26.5,26,8.5),(0,-.7,14),.35)]:
     bpy.ops.mesh.primitive_uv_sphere_add(segments=56,ring_count=28,radius=1);obj=bpy.context.object
     for v in obj.data.vertices:
         s=v.co.copy();v.co=Vector([math.copysign(abs(s[k])**(power if k<2 else .6),s[k])*dimensions[k]/2*I+center[k]*I for k in range(3)])
-        if name.startswith('Loose'):v.co.z+=.055*I*math.sin(v.co.x/I*2.2)*math.exp(-((abs(v.co.y/I+1.3)-10)/2)**2)
+        x,y=fit_seat_back(v.co.x/I,v.co.y/I);v.co.x=x*I;v.co.y=y*I
     finish(obj,name,'leather',chair)
 points=[]
 for j in range(97):
-    a=j/96*math.tau;x=math.copysign(abs(math.cos(a))**.35,math.cos(a))*13.25;y=math.copysign(abs(math.sin(a))**.35,math.sin(a))*13-.7;points.append((x,y,13.9))
+    a=j/96*math.tau;x=math.copysign(abs(math.cos(a))**.35,math.cos(a))*13.25;y=math.copysign(abs(math.sin(a))**.35,math.sin(a))*13-.7;x,y=fit_seat_back(x,y);points.append((x,y,13.9))
 pipe('Seat cushion welt',points,.035,chair)
 points=[]
 for j in range(89):

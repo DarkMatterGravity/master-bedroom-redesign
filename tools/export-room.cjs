@@ -15,6 +15,7 @@ let browser;
   const data=await page.evaluate(({includeSeating})=>{
     const r=roomStudy,meshes=[];r.scene.updateMatrixWorld(true);
     function average(material){
+      if(material.userData.stainEnabled&&material.userData.stainColor)return material.userData.stainColor;
       const color=material.color?.clone();if(!color)return [0.5,0.5,0.5];
       const image=material.map?.image;
       if(image){const canvas=document.createElement('canvas');canvas.width=canvas.height=16;const c=canvas.getContext('2d');c.drawImage(image,0,0,16,16);const p=c.getImageData(0,0,16,16).data;const sum=[0,0,0];for(let i=0;i<p.length;i+=4)for(let k=0;k<3;k++){const s=p[i+k]/255;sum[k]+=s<.04045?s/12.92:((s+.055)/1.055)**2.4;}color.r*=sum[0]/256;color.g*=sum[1]/256;color.b*=sum[2]/256;}

@@ -92,6 +92,13 @@ round table in `Assets/window-seating.blend` and exports its GLB. Chair centres
 are X=28/88, Z=29 inches, angled inward 20 degrees; the 18-inch table is centred
 at X=58, Z=32 with a 21.625-inch top, black metal pedestal and 14-inch circular
 metal foot. Each chair has a single upholstered seat rather than stacked pads.
+The seat's rear corners and welt follow the barrel's curved outline, with
+clearance inside the outer shell so they cannot protrude through the back.
+The runtime leather albedo samples the bed throw's slate color, with its own
+leather grain and sheen. `photo-materials.js` derives the After floor stain
+from the shared bed wood, retaining the floor's plank/normal/roughness maps.
+The shader's stain uniform is disabled in Before. Exported floor bounce color
+uses the same stain when baking the seating.
 To rebuild the added seating lighting:
 
 ```powershell

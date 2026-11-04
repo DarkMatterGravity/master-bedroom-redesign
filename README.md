@@ -237,7 +237,7 @@ The tall window-wall painting is now 26 ? 56 inches, centered at 55 inches
 above the floor (12 inches lower than before). Its 3-inch black frame remains
 uniform in width. A matching black gallery light casts warm light onto it.
 
-The After room includes two Blender-modeled cognac leather barrel chairs at
+The After room includes two Blender-modeled slate-blue leather barrel chairs at
 the window corner, angled toward an 18-inch round pedestal table. Their legs
 and tabletop use the same muted wood finish as the bed, chest and dresser.
 Each chair has one upholstered seat level. The table has a black metal
@@ -245,6 +245,9 @@ pedestal and a low circular metal base.
 Cream/slate houndstooth cushions echo the bed pillows. Editable geometry is in
 `Assets/window-seating.blend`; `seating.js` loads its GLB and separate day/night
 vertex lighting. The route between the seating and chest stays clear.
+The leather color is sampled from the bed throw's material. The dark floor
+uses the bed wood's average stain color while retaining the floor's plank
+texture and grain; Before retains the original light flooring.
 
 The bed-wall canvas now uses a dramatic abstract expressionist ocean painting
 in navy, slate, seafoam and ivory. Its asset and generation prompt are saved in
