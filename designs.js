@@ -236,7 +236,7 @@ export function createInspiredDesign({scene,INCH,box,sphere,cylinder,rod,m,photo
         // Broad S folds gather gently at the rod and billow near the hem.
         const fold=Math.sin(u*2*Math.PI/7.5)*1.1+Math.sin(u*4*Math.PI/7.5+.25)*.12;
         p.setZ(i,(fold*(.35+.85*(1-t))+Math.sin(v*.055+side)*.14*(1-t))*INCH);
-        p.setY(i,(v+Math.cos(u*2*Math.PI/7.5)*.1*(1-t)**4)*INCH);
+        p.setY(i,(v+t+Math.cos(u*2*Math.PI/7.5)*.1*(1-t)**4)*INCH);
       }geo.computeVertexNormals();
       const mat=curtainLinen.clone();mat.side=THREE.DoubleSide;const panel=new THREE.Mesh(geo,mat);panel.name='soft-s-fold-curtain';panel.userData.softgoods='curtain';panel.position.set(side*offset*INCH,48.5*INCH,4*INCH);panel.castShadow=panel.receiveShadow=true;g.add(panel);
       for(let u=-5;u<=5;u+=2){const ring=new THREE.Mesh(new THREE.TorusGeometry(.6*INCH,.09*INCH,6,16),brass);ring.position.set((side*offset+u)*INCH,88.5*INCH,4*INCH);g.add(ring);}

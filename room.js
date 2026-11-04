@@ -1,12 +1,12 @@
 import * as THREE from './vendor/three.module.js';
-import { createInspiredDesign } from './designs.js?v=20261103-blue-curtains';
+import { createInspiredDesign } from './designs.js?v=20261103-curtain-rings';
 import { createVaultedCeiling } from './vaulted.js?v=20261103-day-restore';
 import { createWindowReflections } from './glass.js?v=20261103-quality';
 import { createPhotoMaterials, createPhotoFloor } from './photo-materials.js?v=20261103-chair-back';
 import { createAntiqueFurniture } from './antique-furniture.js';
 import { miteredRail, miteredFrameBand } from './joinery.js';
 import { createPhotoExterior } from './exterior.js?v=20261103-day-restore';
-import { installRefinedSoftgoods, installBakedLighting, followWallLighting } from './quality.js?v=20261103-day-restore';
+import { installRefinedSoftgoods, installBakedLighting, followWallLighting } from './quality.js?v=20261103-curtain-rings';
 import { installWindowSeating, installSeatingLighting } from './seating.js?v=20261103-chair-back';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.

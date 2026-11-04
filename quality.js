@@ -3,7 +3,7 @@ import { GLTFLoader } from './vendor/addons/loaders/GLTFLoader.js';
 import { HDRLoader } from './vendor/addons/loaders/HDRLoader.js';
 
 export async function installRefinedSoftgoods(inspired){
-  const asset=await new GLTFLoader().loadAsync('./Assets/softgoods.glb?v=20261103-bedding');
+  const asset=await new GLTFLoader().loadAsync('./Assets/softgoods.glb?v=20261103-curtain-rings');
   inspired.group.traverse(object=>{if(object.userData.softgoods)object.visible=false;});
   asset.scene.name='blender-refined-softgoods';
   asset.scene.traverse(object=>{
