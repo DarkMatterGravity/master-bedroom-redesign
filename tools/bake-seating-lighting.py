@@ -21,3 +21,5 @@ for mode in ['day','night']:
     if not np.isfinite(values).all() or values.max()<.00001:raise RuntimeError('Invalid seating illumination')
     values.astype(np.float16).tofile(output/f'{mode}.bin');print('SEATING_BAKE_COMPLETE',mode,'seconds',round(time.time()-started),flush=True)
 (output/'manifest.json').write_text(json.dumps(manifest,separators=(',',':')))
+import runpy
+runpy.run_path(str(ROOT/'tools/smooth-seating-lighting.py'),run_name='__main__')

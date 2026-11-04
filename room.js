@@ -7,7 +7,7 @@ import { createAntiqueFurniture } from './antique-furniture.js';
 import { miteredRail, miteredFrameBand } from './joinery.js';
 import { createPhotoExterior } from './exterior.js?v=20261103-day-restore';
 import { installRefinedSoftgoods, installBakedLighting, followWallLighting } from './quality.js?v=20261103-day-restore';
-import { installWindowSeating, installSeatingLighting } from './seating.js?v=20261103-seating';
+import { installWindowSeating, installSeatingLighting } from './seating.js?v=20261103-seating-smooth';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.
 const INCH = 0.0254;

@@ -101,5 +101,7 @@ node tools/export-room.cjs --include-seating
 This uses the established room lights and five diffuse bounces at 512 samples,
 with smooth normals for the curved upholstery. Only the 29 new meshes receive
 the separate `Textures/Seating` float16 buffers; the existing room atlas stays
-valid. Normal room exports omit this extension unless `--include-seating` is
+valid. The baker then runs `smooth-seating-lighting.py` to average upholstery
+noise at welded vertices and four neighbouring surface passes. Normal room
+exports omit this extension unless `--include-seating` is
 specified. The large canvas bitmap and prompt are in `Images/Art`.

@@ -41,7 +41,7 @@ export async function installWindowSeating(inspired,photoMaterials){
 }
 
 export async function installSeatingLighting(scene){
-  const base='./Textures/Seating/',version='?v=20261103-seating';
+  const base='./Textures/Seating/',version='?v=20261103-seating-smooth';
   const [manifest,day,night]=await Promise.all([fetch(base+'manifest.json'+version).then(r=>{if(!r.ok)throw new Error('Seating lighting manifest missing');return r.json();}),fetch(base+'day.bin'+version).then(r=>r.arrayBuffer()),fetch(base+'night.bin'+version).then(r=>r.arrayBuffer())]);
   const values={day:new Uint16Array(day),night:new Uint16Array(night)},entries=[];
   for(const record of manifest.records){
