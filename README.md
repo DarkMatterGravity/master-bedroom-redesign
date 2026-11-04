@@ -230,8 +230,9 @@ wide black frame matches the others and stands clear of the chair rail. The
 new artwork applies to versions 2?4; the family photo above the shared dresser
 is present in every version.
 
-Curtain linen now uses a deeper warm beige (`#9c8c75`), retaining its
-woven normal/roughness maps and smooth S-shaped drape in versions 2?4.
+Curtains use the same blue-and-cream houndstooth as the pillows, scaled to
+keep the checks square on the tall panels. Their woven normal/roughness maps
+and smooth S-shaped drape remain in versions 2?4.
 
 The tall window-wall painting is now 26 ? 56 inches, centered at 55 inches
 above the floor (12 inches lower than before). Its 3-inch black frame remains
