@@ -8,8 +8,8 @@ import { miteredRail, miteredFrameBand } from './joinery.js';
 import { createPhotoExterior } from './exterior.js?v=20261103-day-restore';
 import { installRefinedSoftgoods, installBakedLighting, followWallLighting } from './quality.js?v=20261103-curtain-rings';
 import { installWindowSeating, installSeatingLighting } from './seating.js?v=20261103-chair-back';
-import { createOfficeRoom } from './office.js?v=20261105-office';
-import { createHousePlan } from './house-plan.js?v=20261105-office';
+import { createOfficeRoom } from './office.js?v=20261105-redesign-clear';
+import { createHousePlan } from './house-plan.js?v=20261105-redesign-clear';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.
 const INCH = 0.0254;

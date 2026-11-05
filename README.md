@@ -12,18 +12,19 @@ its existing layout from the supplied photographs.
 
 The office measures **88 by 133 inches**, with a **73-inch desk**, three
 33-inch window units along the desk wall and two on the end wall. The solid
-house-side wall holds the storage/collections. The pocket door is 36 inches
+house-side wall is cleared for the redesign. The pocket door is 36 inches
 wide, following the user's message (the sketch says 30). Ceiling height is
 provisionally 96 inches; window heights and furniture details are estimated
 from IMG_7616 through IMG_7621. Its projected location on the map is approximate
 and the rooms are separate scenes, representing their different floors.
 
-`office.js` builds the warm oak floor, black workstation and storage, monitors,
-keyboard tray, blue mesh chair, fan, radio/sailboat and simplified collectibles.
-A world-space yard provides ground-level window depth. The editable office
+`office.js` builds the warm oak floor, black workstation, monitors, keyboard
+tray, blue mesh chair and fan. The back-wall furniture/decor and provisional
+exterior scenery have been removed; window views are blank pending the new
+exterior video. The editable office
 parameters are independent of the bedroom's established baked-lighting layout.
-The supplied collection photo is preserved as
-`Images/References/Office-collections.jpg` and sampled for the wall display.
+The supplied collection photo remains archived as
+`Images/References/Office-collections.jpg` for reference.
 
 Daytime windows use the original curved exterior from two photographs and
 nine calibrated video frames of the actual neighborhood and water view.

@@ -23,7 +23,7 @@ export function createHousePlan({canvas,getState,onSelect}){
     c.fillStyle='#52695c';c.font='bold 10px Segoe UI, sans-serif';c.textAlign='center';c.fillText('Bedroom · 2F',82,42);
     c.save();c.translate(OFFICE_PLAN.x,OFFICE_PLAN.z);
     c.fillStyle=activeRoom==='office'?'#dce8e7':'#e8e9e1';c.fillRect(0,0,88,133);c.strokeStyle=activeRoom==='office'?'#527d7b':'#9ea99b';c.lineWidth=1.7;c.strokeRect(0,0,88,133);
-    c.fillStyle='#94aaa8';c.fillRect(0,20,24,73);c.fillStyle='#afb9ac';c.fillRect(72,4.5,16,93);c.fillRect(69,106.5,18,21);
+    c.fillStyle='#94aaa8';c.fillRect(0,20,24,73);
     c.fillStyle='#6e8ba1';c.beginPath();c.ellipse(44,57,10,12,0,0,Math.PI*2);c.fill();
     c.strokeStyle='#83afbb';c.lineWidth=3;c.beginPath();for(const z of [12,50,88]){c.moveTo(0,z);c.lineTo(0,z+33);}for(const x of [9,46]){c.moveTo(x,133);c.lineTo(x+33,133);}c.stroke();
     c.strokeStyle='#faf9f0';c.lineWidth=4;c.beginPath();c.moveTo(30-doorWidth/2,0);c.lineTo(30+doorWidth/2,0);c.stroke();
