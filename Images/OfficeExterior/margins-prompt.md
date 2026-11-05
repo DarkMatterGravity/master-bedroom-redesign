@@ -1,0 +1,10 @@
+# Office exterior margin extension
+
+Mode: built-in `image_gen` edit. Use case: compositing / outpainting.
+Output: `margins-outpaint.png`. The panorama builder uses this only outside
+the captured mask, with a narrow feather at the boundary; interior photographic
+pixels are restored from the registered video frames.
+
+Prompt:
+
+Use case: compositing / photographic outpainting. Edit target: the attached transparent 2:1 equirectangular panorama texture. This is a real New Jersey yard captured from an office window on an overcast autumn day. The transparent areas (shown black by some viewers) are missing footage, NOT part of the scene. Fill ONLY the transparent/missing areas with a seamless photographic continuation. Keep all existing photographed content in exactly the same positions and proportions: the red house, distant houses, white picket fences, tree trunks, plants, rooflines, grass and leaves. Do not move, tilt, duplicate, redesign or repaint those recorded objects. Do not crop, zoom, reframe or change the 2:1 canvas layout. The existing photographed band lies approximately between y=33% and y=70%, primarily x=38% to the right edge, plus a narrow strip on the far left. Above it extend the same soft gray cloudy sky and natural upper tree foliage; below it extend realistic lawn/ground with subtle fallen autumn leaves and foreground planting, with correct equirectangular panoramic perspective. Complete the missing middle-left sector with unobtrusive lawn, foliage and a natural continuation of the existing fence where needed; do not add ANY new buildings, people, cars, objects, furniture, text, signs or decorations. No repeating houses. No stretched fence posts, horizontal smears, artificial fog bands, flat-color bands or transparent margins. Keep existing foreground fence posts their natural length, completing their bases and the lawn beneath them rather than stretching them down the canvas. Match the original soft daylight, muted greens, burgundy leaves and photographic texture. Left and right edges should wrap continuously as a 360 panorama. Output a fully opaque finished 2:1 background texture, retaining the exact source layout.

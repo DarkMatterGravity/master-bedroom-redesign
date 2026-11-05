@@ -20,13 +20,16 @@ and the rooms are separate scenes, representing their different floors.
 
 `office.js` builds the warm oak floor, black workstation, monitors, keyboard
 tray, blue mesh chair and fan. The back-wall furniture/decor and provisional
-exterior scenery have been removed; window views are blank pending the new
-exterior video. The editable office
+exterior scenery have been removed. The daytime window views now use a single
+spherical panorama assembled from 20 frames of IMG_7622.MOV. The house faces
+the end windows and the maple spans the long window wall. Missing outer sky,
+foliage and ground are extended around the preserved photographic capture.
+The editable office
 parameters are independent of the bedroom's established baked-lighting layout.
 The supplied collection photo remains archived as
 `Images/References/Office-collections.jpg` for reference.
 
-Daytime windows use the original curved exterior from two photographs and
+The bedroom's daytime windows use the original curved exterior from two photographs and
 nine calibrated video frames of the actual neighborhood and water view.
 Night mode uses its stitched panorama from the actual nighttime sweep.
 The front-window plantation shutters stay open.

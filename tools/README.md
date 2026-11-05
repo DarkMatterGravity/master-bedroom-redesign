@@ -15,6 +15,23 @@ walking/collisions, room-pose restoration and mobile navigation. Screenshots
 and the result JSON stay in `previews/`. `ROOM_URL` can point at the published
 site for the same checks.
 
+The office video exterior is isolated in `office-exterior.js`. Source JPEGs,
+fixed-lens camera rotations, the 4096-by-2048 panorama and its manifest live in
+`Images/OfficeExterior`. Refit the saved frames with
+`python tools/calibrate-office-exterior.py`, then blend with
+`python tools/stitch-office-exterior.py`. Pass `--video path/to/IMG_7622.MOV`
+to the calibration command to extract the original clip again. The solver uses
+reciprocal local feature matches, angular RANSAC and a rotation graph with a
+fixed 1004.3-pixel focal length at 720-by-1280 resolution. Graph-cut seams and
+multiband blending limit parallax ghosts and exposure steps. The generated
+`margins-outpaint.png` fills only unrecorded areas; the captured interior is
+restored from the registered frames, with a 16-pixel boundary feather. The exact
+built-in image-tool prompt is saved alongside it. Without that extension asset,
+the builder falls back to soft sky/ground colors. Photo borders are never
+clamped or stretched. The panorama sits on a 10-metre sphere around the office, and is
+hidden at night until a nighttime capture is provided. This does not modify
+the upstairs bedroom's exterior.
+
 Files:
 
 - `Assets/softgoods.blend`: editable Blender source for the fabric meshes.

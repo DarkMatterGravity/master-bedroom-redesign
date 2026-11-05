@@ -1,0 +1,22 @@
+{
+  "sourceVideo": "IMG_7622.MOV",
+  "frames": 20,
+  "width": 4096,
+  "height": 2048,
+  "focalPixels": 1004.3,
+  "anchorTimeSeconds": 2.0500000000000003,
+  "radiusMeters": 10,
+  "originInches": [
+    44,
+    63,
+    66.5
+  ],
+  "capturedYawDegrees": [
+    -42.24974478695091,
+    206.7037253640891
+  ],
+  "uncapturedFill": "AI-assisted sky/ground/foliage continuation outside the captured mask",
+  "image": "panorama-day.jpg",
+  "marginAsset": "margins-outpaint.png",
+  "photographicInteriorPreserved": true
+}

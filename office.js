@@ -1,4 +1,5 @@
 import * as THREE from './vendor/three.module.js';
+import { createOfficeExterior } from './office-exterior.js?v=20261105-office-video';
 
 // Measured porch-office footprint, in inches. Local +Z runs away from the
 // pocket door; X=88 is the solid wall toward the main house.
@@ -98,19 +99,17 @@ export function createOfficeRoom({photoMaterials,pocketDoorWidth=36}){
   for(const side of [-1,1]){tube([[side*9.5,24,7],[side*10,34,7.5],[side*9.5,47,7]],.55,black,chair);box(3,1.3,10,side*12,26,-1,black,chair,.6);rod([side*9,17,3],[side*12,25,2],.6,black,chair);}
   rod([-9.5,24,7],[9.5,24,7],.65,black,chair);rod([-9.5,47,7],[9.5,47,7],.6,black,chair);sphere(8.2,3.6,1.7,0,51,8.5,blue,chair);tube([[-7,49,9],[0,47,10],[7,49,9]],.6,black,chair);collider(44,57,22,24);
   // The house-side wall is cleared for the redesign.
-  const ready=Promise.resolve();
   const bedMat=mat('#b9b8ad',1);sphere(14,2.3,11,38,3,119,bedMat);const petRim=new THREE.Mesh(new THREE.TorusGeometry(11*I,2.6*I,12,48),bedMat);petRim.rotation.x=Math.PI/2;petRim.scale.x=1.2;petRim.position.set(38*I,4.3*I,119*I);root.add(petRim);
   const catBlack=mat('#242827',1),catWhite=mat('#deded0',1);sphere(3.4,2.9,5.3,11,33.7,73,catBlack);sphere(2.5,2.4,2.3,14,36,69,catBlack);sphere(1.7,1.3,.7,14.4,35,67,catWhite);sphere(1.5,1,2,15,31.7,68,catWhite);for(const z of [67.4,70.4]){const ear=new THREE.Mesh(new THREE.ConeGeometry(1.05*I,2.2*I,3),catBlack);ear.position.set(14*I,38.3*I,z*I);root.add(ear);}tube([[10,33,77],[7,33.5,76],[7,33,71]],.7,catBlack);
   // Low-profile ceiling fan with five timber blades.
   const fan=new THREE.Group();fan.name='office-ceiling-fan';fan.position.set(44*I,87*I,70*I);root.add(fan);cylinder(3.4,4,2,0,8,0,black,fan);rod([0,2,0],[0,7,0],.65,black,fan);sphere(4.5,2.7,4.5,0,0,0,black,fan);
   for(let j=0;j<5;j++){const blade=new THREE.Group();blade.rotation.y=j*Math.PI*2/5;fan.add(blade);box(7,.4,20,0,-.1,14,wood,blade,1.3);rod([0,0,3],[0,0,8],.4,steel,blade);}rod([1,-2,0],[1,-14,0],.06,black,fan);
-  // Exterior video will be fitted here; keep the window views empty for now.
-  const yard=new THREE.Group();yard.name='office-exterior-placeholder';yard.userData.pendingVideo=true;scene.add(yard);
+  const exterior=createOfficeExterior(scene),yard=exterior.group,ready=exterior.ready;
   const sky=new THREE.HemisphereLight('#dbe8f2','#82765e',1.3);scene.add(sky);dayLights.push(sky);
   const sun=new THREE.DirectionalLight('#fff5df',2.5);sun.position.set(-140*I,220*I,230*I);sun.target.position.set(40*I,25*I,65*I);scene.add(sun,sun.target);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-4,right:4,top:4,bottom:-4,near:.5,far:15});sun.shadow.bias=-.00015;sun.shadow.normalBias=.008;dayLights.push(sun);
   const fill=new THREE.PointLight('#d9e8f6',8,7,2);fill.position.set(4*I,65*I,65*I);scene.add(fill);dayLights.push(fill);
   const ambient=new THREE.HemisphereLight('#b4c3d2','#5d5145',.24);scene.add(ambient);nightLights.push(ambient);const lampFill=new THREE.PointLight('#ffdfb0',8,6,2);lampFill.position.set(45*I,79*I,65*I);scene.add(lampFill);nightLights.push(lampFill);
-  function setLighting(night){scene.background=new THREE.Color(night?'#101923':'#d8dcd9');dayLights.forEach(l=>l.visible=!night);nightLights.forEach(l=>l.visible=night);yard.traverse(o=>{if(o.isMesh&&o.material?.isMeshStandardMaterial)o.material.envMapIntensity=night?.12:1;});}
+  function setLighting(night){scene.background=new THREE.Color(night?'#101923':'#d8dcd9');dayLights.forEach(l=>l.visible=!night);nightLights.forEach(l=>l.visible=night);exterior.setLighting(night);}
   setLighting(false);
   return {scene,root,ready,dimensions,windows,colliders,door,desk,chair,fan,yard,setLighting,
     view:{p:[53,63,12],target:[25,41,100]},
