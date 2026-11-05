@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Master bedroom · Room study</title>
-  <link rel="stylesheet" href="style.css?v=20261102-before-after">
+  <link rel="stylesheet" href="style.css?v=20261105-office">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234b7060'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-size='36' fill='%23f6f5eb' font-family='Georgia'%3EM%3C/text%3E%3C/svg%3E">
 </head>
 <body>
@@ -11,8 +11,8 @@
   <div id="design-picker" role="group" aria-label="Compare before and after"><button type="button" aria-label="Before: existing room" data-design="1" aria-pressed="true" title="Before: existing room">Before</button><button type="button" aria-label="After: redesigned room" data-design="4" aria-pressed="false" title="After: redesigned room">After</button></div>
   <button id="day-night" type="button" aria-label="Switch to night" aria-pressed="false">☀ Day</button>
   <button id="plan-toggle" type="button" aria-controls="floor-plan" aria-expanded="false" aria-pressed="false">▱ Floor plan</button>
-  <div id="floor-plan" hidden><canvas id="plan-canvas" width="338" height="374" role="img" aria-label="Bedroom floor plan with your current position and viewing direction"></canvas></div>
+  <div id="floor-plan" hidden><canvas id="plan-canvas" width="338" height="374" role="img" aria-label="Room navigation floor plan: bedroom on the second floor and office on the first floor"></canvas><div id="plan-room-links" aria-label="Choose a room"><button type="button" data-room="bedroom" aria-pressed="true">Bedroom &middot; 2F</button><button type="button" data-room="office" aria-pressed="false">Office &middot; 1F</button></div></div>
   <div id="loading"><span class="spinner"></span><p>Building your room…</p></div>
-<script type="module" src="room.js?v=20261103-rail-photo"></script>
+<script type="module" src="room.js?v=20261105-office"></script>
 </body>
 </html>

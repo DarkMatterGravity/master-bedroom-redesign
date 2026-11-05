@@ -21,7 +21,7 @@ const fs = require('node:fs');
   await page.mouse.move(650,350);await page.mouse.down();await page.mouse.move(850,400,{steps:6});await page.mouse.up();
   if(yaw===await page.evaluate(()=>roomStudy.camera.rotation.y))errors.push('Drag look failed');
   if(await page.locator('header,aside,section,footer,select').count())errors.push('Unwanted room overlays still present');
-  if(await page.locator('button').count()!==4)errors.push('Expected Before/After buttons plus day/night and floor-plan toggles');
+  if(await page.locator('button').count()!==6)errors.push('Expected Before/After, day/night, floor plan and two room links');
   if(await page.locator('#floor-plan').isVisible())errors.push('Floor plan should start hidden');
   await page.click('#plan-toggle');
   if(!await page.locator('#floor-plan').isVisible())errors.push('Floor plan did not open');

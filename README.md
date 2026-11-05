@@ -1,7 +1,30 @@
-# Master bedroom · interactive room study
+# Bedroom and office | interactive room study
 
 [Open the latest design online](https://darkmattergravity.github.io/master-bedroom-redesign/?design=4).
 The hosted viewer runs directly in a browser; no installation is needed.
+
+[Open the first-floor office](https://darkmattergravity.github.io/master-bedroom-redesign/?room=office&design=4).
+Open **Floor plan** and click either room's footprint or its labeled button to
+switch rooms. Bedroom is marked **2F** and office **1F**. Each room remembers
+its camera position and field of view during the session; day/night is shared.
+The bedroom retains its Before/After comparison. The office currently shows
+its existing layout from the supplied photographs.
+
+The office measures **88 by 133 inches**, with a **73-inch desk**, three
+33-inch window units along the desk wall and two on the end wall. The solid
+house-side wall holds the storage/collections. The pocket door is 36 inches
+wide, following the user's message (the sketch says 30). Ceiling height is
+provisionally 96 inches; window heights and furniture details are estimated
+from IMG_7616 through IMG_7621. Its projected location on the map is approximate
+and the rooms are separate scenes, representing their different floors.
+
+`office.js` builds the warm oak floor, black workstation and storage, monitors,
+keyboard tray, blue mesh chair, fan, radio/sailboat and simplified collectibles.
+A world-space yard provides ground-level window depth. The editable office
+parameters are independent of the bedroom's established baked-lighting layout.
+The supplied collection photo is preserved as
+`Images/References/Office-collections.jpg` and sampled for the wall display.
+
 Daytime windows use the original curved exterior from two photographs and
 nine calibrated video frames of the actual neighborhood and water view.
 Night mode uses its stitched panorama from the actual nighttime sweep.
@@ -10,8 +33,7 @@ The upper window shows blue sky and treetops by day and the matching dark
 canopy at night, cropped from the actual video captures and placed on a distant
 26-meter dome so the scenery moves relative to the frame as you walk.
 
-A companion coastal picture hangs above the west-wall chair rail, in the same
-wide black mitered frame as the other paintings.
+A family photo rests on the west-wall chair rail in a wide black mitered frame.
 
 The After view now uses Blender-refined fabrics and baked day/night lighting,
 with HDR room reflections, soft fabric sheen, and subtle wood varnish. Smaller

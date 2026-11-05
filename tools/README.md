@@ -5,6 +5,16 @@ variant adds Blender-refined soft goods, baked diffuse illumination, HDR room
 reflections, cloth sheen, and restrained clearcoat on wood. Before uses the
 original materials/lighting without baked maps or environment lighting.
 
+The first-floor office is a separate scene built in `office.js`, using the
+88-by-133-inch sketch and the supplied photos. It currently uses real-time
+day/night lighting. The bedroom atlas, mesh paths and lighting files are
+unchanged. `house-plan.js` owns the projected room hit regions and floor labels;
+`room.js` saves and restores the camera pose and selects the active scene.
+Run `node tools/verify-office.cjs` to check map clicks, direct office links,
+walking/collisions, room-pose restoration and mobile navigation. Screenshots
+and the result JSON stay in `previews/`. `ROOM_URL` can point at the published
+site for the same checks.
+
 Files:
 
 - `Assets/softgoods.blend`: editable Blender source for the fabric meshes.

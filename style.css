@@ -7,3 +7,11 @@
 #design-picker{position:fixed;top:16px;left:16px;display:flex;gap:4px;padding:4px;background:#faf9f0e6;border:1px solid #ffffff70;border-radius:22px;box-shadow:0 2px 12px #152b2720;backdrop-filter:blur(10px)}#design-picker button{min-width:29px;height:27px;padding:0 12px;border:0;border-radius:18px;background:transparent;color:#617165;font:12px Segoe UI,Arial,sans-serif;cursor:pointer}#design-picker button[aria-pressed=true]{background:#3b574b;color:#fff8ea}#design-picker button:focus-visible{outline:2px solid #86b49e;outline-offset:2px}
 
 @media(max-width:380px){#design-picker{left:10px;gap:2px;padding:3px}#design-picker button{width:23px;height:26px}}
+
+#floor-plan{width:min(248px,calc(100vw - 32px));z-index:2}
+#plan-room-links{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}
+#plan-room-links button{border:0;border-radius:10px;padding:9px 3px;background:#e8ebe1;color:#486255;font:11px Segoe UI,Arial,sans-serif;cursor:pointer}
+#plan-room-links button[aria-pressed=true]{background:#3b574b;color:#fff8ea}
+#plan-room-links button:focus-visible{outline:2px solid #86b49e;outline-offset:2px}
+#plan-canvas{touch-action:manipulation}
+#design-picker[hidden]{display:none}

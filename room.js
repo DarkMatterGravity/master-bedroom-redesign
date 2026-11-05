@@ -8,6 +8,8 @@ import { miteredRail, miteredFrameBand } from './joinery.js';
 import { createPhotoExterior } from './exterior.js?v=20261103-day-restore';
 import { installRefinedSoftgoods, installBakedLighting, followWallLighting } from './quality.js?v=20261103-curtain-rings';
 import { installWindowSeating, installSeatingLighting } from './seating.js?v=20261103-chair-back';
+import { createOfficeRoom } from './office.js?v=20261105-office';
+import { createHousePlan } from './house-plan.js?v=20261105-office';
 
 // Sketch coordinates: X runs left to right, Z runs top to bottom. Dimensions in inches.
 const INCH = 0.0254;
@@ -267,7 +269,8 @@ const updateWestPaintingLighting=followWallLighting(scene,westWallPainting);
 const windowSeating=await installWindowSeating(inspired,photoMaterials);
 const seatingLighting=window.ROOM_BAKE_EXPORT?{metadata:null,setLighting(){}}:await installSeatingLighting(scene);
 const floorOriginals=oakMats.map(mat=>({map:mat.map,roughness:mat.roughness}));
-let activeDesign=1;
+let activeDesign=1,activeRoom='bedroom',office;
+const roomPoses={};
 let yaw=0,pitch=0,dragging=false,lastX=0,lastY=0,fanOn=false,night=false;
 const keys=new Set(),touchMoves=new Set();
 const viewpoints={entry:{p:[132,64,105],target:[58,37,143]},windows:{p:[26,64,65],target:[85,35,143]},bed:{p:[13,64,143],target:[91,40,33]},desk:{p:[91,48,55],target:[91,43,8]},center:{p:[119,64,62],target:[58,38,139]}};
@@ -281,10 +284,14 @@ viewport.addEventListener('pointerup',endDrag);viewport.addEventListener('pointe
 viewport.addEventListener('wheel',e=>{e.preventDefault();camera.fov=THREE.MathUtils.clamp(camera.fov+e.deltaY*.025,40,90);camera.updateProjectionMatrix();},{passive:false});
 addEventListener('keydown',e=>{if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)){e.preventDefault();keys.add(e.code);}});
 addEventListener('keyup',e=>keys.delete(e.code));addEventListener('blur',()=>{keys.clear();touchMoves.clear();endDrag();});
-function allowed(x,z){const pad=6*INCH;if(x<pad||z<pad||x>(169*INCH-pad)||z>(187*INCH-pad))return false;if(x>(124*INCH-pad)&&z>(120*INCH-pad))return false;for(const c of colliders)if(Math.abs(x-c.x)<c.w+pad&&Math.abs(z-c.z)<c.d+pad)return false;return true;}
+function allowed(x,z){if(activeRoom==='office')return office.allowed(x,z);const pad=6*INCH;if(x<pad||z<pad||x>(169*INCH-pad)||z>(187*INCH-pad))return false;if(x>(124*INCH-pad)&&z>(120*INCH-pad))return false;for(const c of colliders)if(Math.abs(x-c.x)<c.w+pad&&Math.abs(z-c.z)<c.d+pad)return false;return true;}
 function walk(dt){let forward=(keys.has('KeyW')||keys.has('ArrowUp')||touchMoves.has('forward')?1:0)-(keys.has('KeyS')||keys.has('ArrowDown')||touchMoves.has('back')?1:0);let side=(keys.has('KeyD')||keys.has('ArrowRight')||touchMoves.has('right')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')||touchMoves.has('left')?1:0);if(!forward&&!side)return;const len=Math.hypot(forward,side);forward/=len;side/=len;const speed=dt*.9;const x=camera.position.x+(-Math.sin(yaw)*forward+Math.cos(yaw)*side)*speed,z=camera.position.z+(-Math.cos(yaw)*forward-Math.sin(yaw)*side)*speed;if(allowed(x,camera.position.z))camera.position.x=x;if(allowed(camera.position.x,z))camera.position.z=z;}
 function lighting(evening){
   night=evening;
+  if(activeRoom==='office'){
+    office.setLighting(evening);renderer.toneMapping=THREE.AgXToneMapping;renderer.toneMappingExposure=evening?1.15:1.05;
+    $('day-night').textContent=evening?'☾ Night':'☀ Day';$('day-night').setAttribute('aria-pressed',String(evening));$('day-night').setAttribute('aria-label',evening?'Switch to day':'Switch to night');return;
+  }
   const enhanced=activeDesign===4;
   bakedLighting.setLighting(evening,enhanced);
   updateWestPaintingLighting();
@@ -322,6 +329,7 @@ function lighting(evening){
 $('day-night').onclick=()=>lighting(!night);
 function setDesign(number){
   if(![1,2,3,4].includes(number))return;
+  if(activeRoom==='office')setRoom('bedroom');
   activeDesign=number;const redesign=number>=2,vault=number>=3;
   photoMaterials.setQuality(redesign);
   furniture.visible=!redesign;fanGroup.visible=!redesign;inspired.group.visible=redesign;
@@ -351,20 +359,23 @@ function setDesign(number){
   lighting(night);
 }
 for(const button of document.querySelectorAll('[data-design]'))button.onclick=()=>setDesign(Number(button.dataset.design));
-const planCanvas=$('plan-canvas'),planContext=planCanvas.getContext('2d');
-function drawPlan(){
-  const c=planContext;c.clearRect(0,0,338,374);c.save();c.scale(1.7,1.7);c.translate(14,14);
-  c.beginPath();outline.forEach(([x,z],i)=>i?c.lineTo(x,z):c.moveTo(x,z));c.closePath();
-  c.fillStyle='#e2e6dc';c.fill();c.strokeStyle='#8c9a8c';c.lineWidth=1.7;c.stroke();
-  c.fillStyle='#bdc9bf';c.fillRect(24,103,76,80);
-  c.fillStyle='#f6f5ed';c.fillRect(27,166,31,14);c.fillRect(65,166,31,14);
-  c.fillStyle='#a6b9b7';c.fillRect(38,81,48,19);
-  c.fillStyle='#bdc9bf';if(activeDesign===1)c.fillRect(70,1,41,21);c.fillRect(149,dresserZ-16.5,19,33);
-  c.strokeStyle='#83afbb';c.lineWidth=3;c.beginPath();c.moveTo(25,0);c.lineTo(activeDesign===1?59:96,0);c.moveTo(0,25);c.lineTo(0,59);c.stroke();
-  c.strokeStyle='#f7f7ee';c.lineWidth=4;c.beginPath();c.moveTo(activeDesign===1?139:131.5,120);c.lineTo(activeDesign===1?169:161.5,120);c.moveTo(169,25);c.lineTo(169,49);c.stroke();
-  c.translate(camera.position.x/INCH,camera.position.z/INCH);c.rotate(-yaw);
-  c.beginPath();c.moveTo(0,0);c.lineTo(-12,-20);c.quadraticCurveTo(0,-27,12,-20);c.closePath();c.fillStyle='#497d6830';c.fill();
-  c.beginPath();c.arc(0,0,3.7,0,Math.PI*2);c.fillStyle='#42755f';c.fill();c.strokeStyle='#f7f7ee';c.lineWidth=1.4;c.stroke();c.restore();
+const planCanvas=$('plan-canvas');
+const housePlan=createHousePlan({canvas:planCanvas,getState:()=>({activeRoom,activeDesign,camera,yaw,doorWidth:office?.dimensions.pocketDoorWidth}),onSelect:setRoom});
+function drawPlan(){housePlan.draw();}
+function setRoom(name){
+  if(!office||!['bedroom','office'].includes(name)||name===activeRoom)return;
+  roomPoses[activeRoom]={position:camera.position.toArray(),yaw,pitch,fov:camera.fov};
+  keys.clear();touchMoves.clear();endDrag();activeRoom=name;
+  const saved=roomPoses[name];
+  if(saved){camera.position.fromArray(saved.position);yaw=saved.yaw;pitch=saved.pitch;camera.fov=saved.fov;camera.updateProjectionMatrix();updateRotation();}
+  else if(name==='office'){
+    const v=office.view;camera.position.set(...v.p.map(n=>n*INCH));const d=new THREE.Vector3(...v.target.map(n=>n*INCH)).sub(camera.position).normalize();yaw=Math.atan2(-d.x,-d.z);pitch=Math.asin(d.y);camera.fov=74;camera.updateProjectionMatrix();updateRotation();
+  }else setView('entry');
+  $('design-picker').hidden=name==='office';
+  viewport.setAttribute('aria-label',`Interactive 3D ${name}. Drag to look; use W A S D or arrow keys to move.`);
+  document.title=name==='office'?'Office | Room study':'Master bedroom | Room study';
+  const url=new URL(location.href);if(name==='office')url.searchParams.set('room','office');else url.searchParams.delete('room');history.replaceState(null,'',url);
+  lighting(night);drawPlan();
 }
 $('plan-toggle').onclick=()=>{
   const show=$('floor-plan').hidden;
@@ -376,10 +387,14 @@ $('plan-toggle').onclick=()=>{
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 
 let last=performance.now();
-function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05);last=now;walk(dt);if(fanOn)rotor.rotation.y+=dt*2.5;renderer.render(scene,camera);if(!$('floor-plan').hidden)drawPlan();}
+function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.05);last=now;walk(dt);if(fanOn)rotor.rotation.y+=dt*2.5;renderer.render(activeRoom==='office'?office.scene:scene,camera);if(!$('floor-plan').hidden)drawPlan();}
 await photoMaterials.ready;
+office=createOfficeRoom({photoMaterials,pocketDoorWidth:36});
+const initialRoom=new URLSearchParams(location.search).get('room');
+if(initialRoom==='office')await office.ready;
 const initialDesign=Number(new URLSearchParams(location.search).get('design')||1);
 setDesign([1,2,3,4].includes(initialDesign)?initialDesign:1);
-renderer.render(scene,camera);$('loading').remove();requestAnimationFrame(animate);
+if(initialRoom==='office')setRoom('office');
+renderer.render(activeRoom==='office'?office.scene:scene,camera);$('loading').remove();requestAnimationFrame(animate);
 // Read-only scene access is useful when checking dimensions and browser rendering.
-window.roomStudy={scene,camera,renderer,ROOM,colliders,photoFloor,photoMaterials,antiqueFurniture,setView,allowed,lighting,setDesign,inspired,vaulted,ceiling,windowSeating,quality:{refinedSoftgoods,bakedLighting:bakedLighting.metadata,seatingLighting:seatingLighting.metadata},get activeDesign(){return activeDesign;}};
+window.roomStudy={scene,camera,renderer,ROOM,colliders,photoFloor,photoMaterials,antiqueFurniture,setView,allowed,lighting,setDesign,inspired,vaulted,ceiling,windowSeating,office,setRoom,housePlan,get activeRoom(){return activeRoom;},get activeScene(){return activeRoom==='office'?office.scene:scene;},quality:{refinedSoftgoods,bakedLighting:bakedLighting.metadata,seatingLighting:seatingLighting.metadata},get activeDesign(){return activeDesign;}};
